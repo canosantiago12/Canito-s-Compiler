@@ -1,0 +1,140 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    AND
+    BINOMIAL
+    BOOL
+    CTE_BOOL
+    CTE_FLOAT
+    DIV
+    ELSE
+    EQUAL
+    EXP
+    FALSE
+    FLOAT
+    FOR
+    FUNC
+    GREATER_EQUAL_THAN
+    GREATER_THAN
+    IF
+    INT
+    LEFT_CURLY_BRACKET
+    LEFT_PAREN
+    LESS_EQUAL_THAN
+    LESS_THAN
+    MEAN
+    MEDIAN
+    MINUS
+    MOD
+    MODE
+    NOT_EQUAL
+    OR
+    PLOT
+    PLUS
+    POISSON
+    PRINT
+    READ_INPUT
+    RETURN
+    RIGHT_CURLY_BRACKET
+    RIGHT_PAREN
+    STANDARD_DEVIATION
+    STRING
+    TIMES
+    TRUE
+    VARIANCE
+    VOID
+    WHILE
+
+Grammar
+
+Rule 0     S' -> program_main
+Rule 1     program_main -> PROGRAM CTE_ID SEMI_COLON globalVariables globalFunctions MAIN LEFT_BRACKET RIGHT_BRACKET func_body
+Rule 2     globalVariables -> vars
+Rule 3     globalVariables -> empty
+Rule 4     globalFunctions -> funcs
+Rule 5     globalFunctions -> empty
+Rule 6     vars -> VAR vars_aux
+Rule 7     vars_aux -> type vars_type
+Rule 8     vars_aux -> type vars_type_array
+Rule 9     vars_aux -> type vars_type_matrix
+Rule 10    vars_aux -> empty
+Rule 11    vars_type -> CTE_ID COMMA vars_type
+Rule 12    vars_type -> CTE_ID SEMI_COLON vars_aux
+Rule 13    vars_type_array -> CTE_ID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
+Rule 14    vars_type_array -> CTE_ID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars_aux
+Rule 15    vars_type_matrix -> CTE_ID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+Rule 16    vars_type_matrix -> CTE_ID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars_aux
+Rule 17    empty -> <empty>
+
+Terminals, with rules where they appear
+
+AND                  : 
+BINOMIAL             : 
+BOOL                 : 
+COMMA                : 11 13 15
+CTE_BOOL             : 
+CTE_FLOAT            : 
+CTE_ID               : 1 11 12 13 14 15 16
+CTE_INT              : 13 14 15 15 16 16
+DIV                  : 
+ELSE                 : 
+EQUAL                : 
+EXP                  : 
+FALSE                : 
+FLOAT                : 
+FOR                  : 
+FUNC                 : 
+GREATER_EQUAL_THAN   : 
+GREATER_THAN         : 
+IF                   : 
+INT                  : 
+LEFT_BRACKET         : 1 13 14 15 15 16 16
+LEFT_CURLY_BRACKET   : 
+LEFT_PAREN           : 
+LESS_EQUAL_THAN      : 
+LESS_THAN            : 
+MAIN                 : 1
+MEAN                 : 
+MEDIAN               : 
+MINUS                : 
+MOD                  : 
+MODE                 : 
+NOT_EQUAL            : 
+OR                   : 
+PLOT                 : 
+PLUS                 : 
+POISSON              : 
+PRINT                : 
+PROGRAM              : 1
+READ_INPUT           : 
+RETURN               : 
+RIGHT_BRACKET        : 1 13 14 15 15 16 16
+RIGHT_CURLY_BRACKET  : 
+RIGHT_PAREN          : 
+SEMI_COLON           : 1 12 14 16
+STANDARD_DEVIATION   : 
+STRING               : 
+TIMES                : 
+TRUE                 : 
+VAR                  : 6
+VARIANCE             : 
+VOID                 : 
+WHILE                : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+empty                : 3 5 10
+func_body            : 1
+funcs                : 4
+globalFunctions      : 1
+globalVariables      : 1
+program_main         : 0
+type                 : 7 8 9
+vars                 : 2
+vars_aux             : 6 12 14 16
+vars_type            : 7 11
+vars_type_array      : 8 13
+vars_type_matrix     : 9 15
+
