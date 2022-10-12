@@ -14,6 +14,7 @@ tokens = ('IF', 'ELSE', 'FOR', 'WHILE',
 reserved = {
     'program': 'PROGRAM',
     'main': 'MAIN',
+    'var' : 'VAR',
     'func': 'FUNC',
     'return': 'RETURN',
     'if': 'IF',
@@ -26,7 +27,7 @@ reserved = {
     'string': 'STRING',
     'true': 'TRUE',
     'false': 'FALSE',
-    'void': 'VOID',
+    'void': 'VOID'
 }
 
 # Regexp
@@ -51,7 +52,7 @@ t_RIGHT_PAREN = r'\)'
 t_LEFT_BRACKET = r'\['
 t_RIGHT_BRACKET = r'\]'
 t_LEFT_CURLY_BRACKET = r'\{'
-t_RIGHT_CURLY_BRACKET = r'/}'
+t_RIGHT_CURLY_BRACKET = r'\}'
 
 t_COMMA = r'\,'
 t_SEMI_COLON = r'\;'
@@ -59,18 +60,18 @@ t_SEMI_COLON = r'\;'
 # Ignored characters
 t_ignore = " \t"
 
-def t_VAR_CTE_ID(t):
+def t_CTE_ID(t):
     r'([a-z][a-zA-Z0-9]*)'
     if t.value in reserved:
         t.type = reserved[t.value]
     return t
     
-def t_VAR_CTE_FLOAT(t):
+def t_CTE_FLOAT(t):
     r'[-]?[0-9]+([.][0-9]+)'
     t.value = float(t.value)
     return t
 
-def t_VAR_CTE_INT(t):
+def t_CTE_INT(t):
     r'[-]?[0-9]+'
     t.value = int(t.value)
     return t
