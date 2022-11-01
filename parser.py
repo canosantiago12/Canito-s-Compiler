@@ -170,7 +170,7 @@ currType = ''
 # Main function variables and functions Rules
 def p_mainFunction(p):
     '''
-    program_main : PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    program_main : PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
     '''
 
 def p_globalVariables(p):
@@ -186,7 +186,6 @@ def p_globalFunctions(p):
     '''
 
 # Variables Rules
-
 def p_vars(p):
     '''
     vars : VAR type vars_type
@@ -221,7 +220,23 @@ def p_funcs(p):
 
 def p_funcs_aux(p):
     '''
-    funcs_aux : FUNC CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    funcs_aux : FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
+    '''
+
+def p_funcBody(p):
+    '''
+    funcBody : LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+    '''
+
+def p_auxFuncBody(p):
+    '''
+    auxFuncBody : vars
+    '''
+
+# Read Rule
+def p_read(p):
+    '''
+    read : READ_INPUT LEFT_PAREN RIGHT_PAREN SEMI_COLON
     '''
 
 # Variables Type
@@ -240,7 +255,11 @@ def p_startup(p):
 
     program = p[-1]
     funcID = program
-    variablesTable[program] = {'type' : 'void', 'vars' : {}}
+    #variablesTable[program] = {'type' : 'void', 'vars' : {}}
+
+def p_endPrint(p):
+    'endPrint :'
+    print(variablesTable)
 
 def p_saveFuncID(p):
     'saveFuncID :'

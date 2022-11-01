@@ -28,7 +28,6 @@ Unused terminals:
     PLUS
     POISSON
     PRINT
-    READ_INPUT
     RETURN
     STANDARD_DEVIATION
     TIMES
@@ -40,7 +39,7 @@ Unused terminals:
 Grammar
 
 Rule 0     S' -> program_main
-Rule 1     program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+Rule 1     program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
 Rule 2     globalVariables -> vars
 Rule 3     globalVariables -> empty
 Rule 4     globalFunctions -> funcs
@@ -56,22 +55,26 @@ Rule 13    vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_B
 Rule 14    vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
 Rule 15    vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
 Rule 16    funcs -> funcs_aux globalFunctions
-Rule 17    funcs_aux -> FUNC CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
-Rule 18    type -> INT setCurrentType
-Rule 19    type -> FLOAT setCurrentType
-Rule 20    type -> BOOL setCurrentType
-Rule 21    type -> STRING setCurrentType
-Rule 22    startup -> <empty>
-Rule 23    saveFuncID -> <empty>
-Rule 24    saveVariableID -> <empty>
-Rule 25    setCurrentType -> <empty>
-Rule 26    empty -> <empty>
+Rule 17    funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
+Rule 18    funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+Rule 19    auxFuncBody -> vars
+Rule 20    read -> READ_INPUT LEFT_PAREN RIGHT_PAREN SEMI_COLON
+Rule 21    type -> INT setCurrentType
+Rule 22    type -> FLOAT setCurrentType
+Rule 23    type -> BOOL setCurrentType
+Rule 24    type -> STRING setCurrentType
+Rule 25    startup -> <empty>
+Rule 26    endPrint -> <empty>
+Rule 27    saveFuncID -> <empty>
+Rule 28    saveVariableID -> <empty>
+Rule 29    setCurrentType -> <empty>
+Rule 30    empty -> <empty>
 
 Terminals, with rules where they appear
 
 AND                  : 
 BINOMIAL             : 
-BOOL                 : 20
+BOOL                 : 23
 COMMA                : 10 12 14
 CTE_BOOL             : 
 CTE_FLOAT            : 
@@ -82,16 +85,16 @@ ELSE                 :
 EQUAL                : 
 EXP                  : 
 FALSE                : 
-FLOAT                : 19
+FLOAT                : 22
 FOR                  : 
 FUNC                 : 17
 GREATER_EQUAL_THAN   : 
 GREATER_THAN         : 
 IF                   : 
-INT                  : 18
+INT                  : 21
 LEFT_BRACKET         : 12 13 14 14 15 15
-LEFT_CURLY_BRACKET   : 1 17
-LEFT_PAREN           : 1 17
+LEFT_CURLY_BRACKET   : 18
+LEFT_PAREN           : 1 17 20
 LESS_EQUAL_THAN      : 
 LESS_THAN            : 
 MAIN                 : 1
@@ -107,14 +110,14 @@ PLUS                 :
 POISSON              : 
 PRINT                : 
 PROGRAM              : 1
-READ_INPUT           : 
+READ_INPUT           : 20
 RETURN               : 
 RIGHT_BRACKET        : 12 13 14 14 15 15
-RIGHT_CURLY_BRACKET  : 1 17
-RIGHT_PAREN          : 1 17
-SEMI_COLON           : 1 11 13 15
+RIGHT_CURLY_BRACKET  : 18
+RIGHT_PAREN          : 1 17 20
+SEMI_COLON           : 1 11 13 15 20
 STANDARD_DEVIATION   : 
-STRING               : 21
+STRING               : 24
 TIMES                : 
 TRUE                 : 
 VAR                  : 6 7 8
@@ -125,18 +128,22 @@ error                :
 
 Nonterminals, with rules where they appear
 
+auxFuncBody          : 18
 empty                : 3 5 9
+endPrint             : 1
+funcBody             : 1 17
 funcs                : 4
 funcs_aux            : 16
 globalFunctions      : 1 16
 globalVariables      : 1
 program_main         : 0
+read                 : 
 saveFuncID           : 1 17
 saveVariableID       : 10 11 12 13 14 15
-setCurrentType       : 18 19 20 21
+setCurrentType       : 21 22 23 24
 startup              : 1
-type                 : 6 7 8
-vars                 : 2 11 13 15
+type                 : 6 7 8 17
+vars                 : 2 11 13 15 19
 vars_type            : 6 10
 vars_type_array      : 7 12
 vars_type_matrix     : 8 14
@@ -146,7 +153,7 @@ Parsing method: LALR
 state 0
 
     (0) S' -> . program_main
-    (1) program_main -> . PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (1) program_main -> . PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
 
     PROGRAM         shift and go to state 2
 
@@ -160,41 +167,41 @@ state 1
 
 state 2
 
-    (1) program_main -> PROGRAM . CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (1) program_main -> PROGRAM . CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
 
     CTE_ID          shift and go to state 3
 
 
 state 3
 
-    (1) program_main -> PROGRAM CTE_ID . startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
-    (22) startup -> .
+    (1) program_main -> PROGRAM CTE_ID . startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
+    (25) startup -> .
 
-    SEMI_COLON      reduce using rule 22 (startup -> .)
+    SEMI_COLON      reduce using rule 25 (startup -> .)
 
     startup                        shift and go to state 4
 
 state 4
 
-    (1) program_main -> PROGRAM CTE_ID startup . SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (1) program_main -> PROGRAM CTE_ID startup . SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
 
     SEMI_COLON      shift and go to state 5
 
 
 state 5
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON . globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON . globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
     (2) globalVariables -> . vars
     (3) globalVariables -> . empty
     (6) vars -> . VAR type vars_type
     (7) vars -> . VAR type vars_type_array
     (8) vars -> . VAR type vars_type_matrix
     (9) vars -> . empty
-    (26) empty -> .
+    (30) empty -> .
 
     VAR             shift and go to state 9
-    FUNC            reduce using rule 26 (empty -> .)
-    MAIN            reduce using rule 26 (empty -> .)
+    FUNC            reduce using rule 30 (empty -> .)
+    MAIN            reduce using rule 30 (empty -> .)
 
     globalVariables                shift and go to state 6
     vars                           shift and go to state 7
@@ -202,14 +209,14 @@ state 5
 
 state 6
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables . globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables . globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
     (4) globalFunctions -> . funcs
     (5) globalFunctions -> . empty
     (16) funcs -> . funcs_aux globalFunctions
-    (26) empty -> .
-    (17) funcs_aux -> . FUNC CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (30) empty -> .
+    (17) funcs_aux -> . FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
 
-    MAIN            reduce using rule 26 (empty -> .)
+    MAIN            reduce using rule 30 (empty -> .)
     FUNC            shift and go to state 14
 
     globalFunctions                shift and go to state 10
@@ -244,10 +251,10 @@ state 9
     (6) vars -> VAR . type vars_type
     (7) vars -> VAR . type vars_type_array
     (8) vars -> VAR . type vars_type_matrix
-    (18) type -> . INT setCurrentType
-    (19) type -> . FLOAT setCurrentType
-    (20) type -> . BOOL setCurrentType
-    (21) type -> . STRING setCurrentType
+    (21) type -> . INT setCurrentType
+    (22) type -> . FLOAT setCurrentType
+    (23) type -> . BOOL setCurrentType
+    (24) type -> . STRING setCurrentType
 
     INT             shift and go to state 16
     FLOAT           shift and go to state 17
@@ -258,7 +265,7 @@ state 9
 
 state 10
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions . MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions . MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
 
     MAIN            shift and go to state 20
 
@@ -283,10 +290,10 @@ state 13
     (4) globalFunctions -> . funcs
     (5) globalFunctions -> . empty
     (16) funcs -> . funcs_aux globalFunctions
-    (26) empty -> .
-    (17) funcs_aux -> . FUNC CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (30) empty -> .
+    (17) funcs_aux -> . FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
 
-    MAIN            reduce using rule 26 (empty -> .)
+    MAIN            reduce using rule 30 (empty -> .)
     FUNC            shift and go to state 14
 
     funcs_aux                      shift and go to state 13
@@ -296,10 +303,18 @@ state 13
 
 state 14
 
-    (17) funcs_aux -> FUNC . CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (17) funcs_aux -> FUNC . type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
+    (21) type -> . INT setCurrentType
+    (22) type -> . FLOAT setCurrentType
+    (23) type -> . BOOL setCurrentType
+    (24) type -> . STRING setCurrentType
 
-    CTE_ID          shift and go to state 22
+    INT             shift and go to state 16
+    FLOAT           shift and go to state 17
+    BOOL            shift and go to state 18
+    STRING          shift and go to state 19
 
+    type                           shift and go to state 22
 
 state 15
 
@@ -321,46 +336,46 @@ state 15
 
 state 16
 
-    (18) type -> INT . setCurrentType
-    (25) setCurrentType -> .
+    (21) type -> INT . setCurrentType
+    (29) setCurrentType -> .
 
-    CTE_ID          reduce using rule 25 (setCurrentType -> .)
+    CTE_ID          reduce using rule 29 (setCurrentType -> .)
 
     setCurrentType                 shift and go to state 27
 
 state 17
 
-    (19) type -> FLOAT . setCurrentType
-    (25) setCurrentType -> .
+    (22) type -> FLOAT . setCurrentType
+    (29) setCurrentType -> .
 
-    CTE_ID          reduce using rule 25 (setCurrentType -> .)
+    CTE_ID          reduce using rule 29 (setCurrentType -> .)
 
     setCurrentType                 shift and go to state 28
 
 state 18
 
-    (20) type -> BOOL . setCurrentType
-    (25) setCurrentType -> .
+    (23) type -> BOOL . setCurrentType
+    (29) setCurrentType -> .
 
-    CTE_ID          reduce using rule 25 (setCurrentType -> .)
+    CTE_ID          reduce using rule 29 (setCurrentType -> .)
 
     setCurrentType                 shift and go to state 29
 
 state 19
 
-    (21) type -> STRING . setCurrentType
-    (25) setCurrentType -> .
+    (24) type -> STRING . setCurrentType
+    (29) setCurrentType -> .
 
-    CTE_ID          reduce using rule 25 (setCurrentType -> .)
+    CTE_ID          reduce using rule 29 (setCurrentType -> .)
 
     setCurrentType                 shift and go to state 30
 
 state 20
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN . saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
-    (23) saveFuncID -> .
+    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN . saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
+    (27) saveFuncID -> .
 
-    LEFT_PAREN      reduce using rule 23 (saveFuncID -> .)
+    LEFT_PAREN      reduce using rule 27 (saveFuncID -> .)
 
     saveFuncID                     shift and go to state 31
 
@@ -373,12 +388,10 @@ state 21
 
 state 22
 
-    (17) funcs_aux -> FUNC CTE_ID . saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
-    (23) saveFuncID -> .
+    (17) funcs_aux -> FUNC type . CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
 
-    LEFT_PAREN      reduce using rule 23 (saveFuncID -> .)
+    CTE_ID          shift and go to state 32
 
-    saveFuncID                     shift and go to state 32
 
 state 23
 
@@ -386,6 +399,7 @@ state 23
 
     FUNC            reduce using rule 6 (vars -> VAR type vars_type .)
     MAIN            reduce using rule 6 (vars -> VAR type vars_type .)
+    RIGHT_CURLY_BRACKET reduce using rule 6 (vars -> VAR type vars_type .)
 
 
 state 24
@@ -394,6 +408,7 @@ state 24
 
     FUNC            reduce using rule 7 (vars -> VAR type vars_type_array .)
     MAIN            reduce using rule 7 (vars -> VAR type vars_type_array .)
+    RIGHT_CURLY_BRACKET reduce using rule 7 (vars -> VAR type vars_type_array .)
 
 
 state 25
@@ -402,6 +417,7 @@ state 25
 
     FUNC            reduce using rule 8 (vars -> VAR type vars_type_matrix .)
     MAIN            reduce using rule 8 (vars -> VAR type vars_type_matrix .)
+    RIGHT_CURLY_BRACKET reduce using rule 8 (vars -> VAR type vars_type_matrix .)
 
 
 state 26
@@ -412,55 +428,57 @@ state 26
     (13) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
     (14) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
     (15) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (24) saveVariableID -> .
+    (28) saveVariableID -> .
 
-    COMMA           reduce using rule 24 (saveVariableID -> .)
-    SEMI_COLON      reduce using rule 24 (saveVariableID -> .)
-    LEFT_BRACKET    reduce using rule 24 (saveVariableID -> .)
+    COMMA           reduce using rule 28 (saveVariableID -> .)
+    SEMI_COLON      reduce using rule 28 (saveVariableID -> .)
+    LEFT_BRACKET    reduce using rule 28 (saveVariableID -> .)
 
     saveVariableID                 shift and go to state 33
 
 state 27
 
-    (18) type -> INT setCurrentType .
+    (21) type -> INT setCurrentType .
 
-    CTE_ID          reduce using rule 18 (type -> INT setCurrentType .)
+    CTE_ID          reduce using rule 21 (type -> INT setCurrentType .)
 
 
 state 28
 
-    (19) type -> FLOAT setCurrentType .
+    (22) type -> FLOAT setCurrentType .
 
-    CTE_ID          reduce using rule 19 (type -> FLOAT setCurrentType .)
+    CTE_ID          reduce using rule 22 (type -> FLOAT setCurrentType .)
 
 
 state 29
 
-    (20) type -> BOOL setCurrentType .
+    (23) type -> BOOL setCurrentType .
 
-    CTE_ID          reduce using rule 20 (type -> BOOL setCurrentType .)
+    CTE_ID          reduce using rule 23 (type -> BOOL setCurrentType .)
 
 
 state 30
 
-    (21) type -> STRING setCurrentType .
+    (24) type -> STRING setCurrentType .
 
-    CTE_ID          reduce using rule 21 (type -> STRING setCurrentType .)
+    CTE_ID          reduce using rule 24 (type -> STRING setCurrentType .)
 
 
 state 31
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID . LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID . LEFT_PAREN RIGHT_PAREN funcBody endPrint
 
     LEFT_PAREN      shift and go to state 34
 
 
 state 32
 
-    (17) funcs_aux -> FUNC CTE_ID saveFuncID . LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (17) funcs_aux -> FUNC type CTE_ID . saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
+    (27) saveFuncID -> .
 
-    LEFT_PAREN      shift and go to state 35
+    LEFT_PAREN      reduce using rule 27 (saveFuncID -> .)
 
+    saveFuncID                     shift and go to state 35
 
 state 33
 
@@ -478,16 +496,16 @@ state 33
 
 state 34
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN . RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN . RIGHT_PAREN funcBody endPrint
 
     RIGHT_PAREN     shift and go to state 39
 
 
 state 35
 
-    (17) funcs_aux -> FUNC CTE_ID saveFuncID LEFT_PAREN . RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (17) funcs_aux -> FUNC type CTE_ID saveFuncID . LEFT_PAREN RIGHT_PAREN funcBody
 
-    RIGHT_PAREN     shift and go to state 40
+    LEFT_PAREN      shift and go to state 40
 
 
 state 36
@@ -507,11 +525,12 @@ state 37
     (7) vars -> . VAR type vars_type_array
     (8) vars -> . VAR type vars_type_matrix
     (9) vars -> . empty
-    (26) empty -> .
+    (30) empty -> .
 
     VAR             shift and go to state 9
-    FUNC            reduce using rule 26 (empty -> .)
-    MAIN            reduce using rule 26 (empty -> .)
+    FUNC            reduce using rule 30 (empty -> .)
+    MAIN            reduce using rule 30 (empty -> .)
+    RIGHT_CURLY_BRACKET reduce using rule 30 (empty -> .)
 
     vars                           shift and go to state 43
     empty                          shift and go to state 44
@@ -528,28 +547,30 @@ state 38
 
 state 39
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN . LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN . funcBody endPrint
+    (18) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
 
-    LEFT_CURLY_BRACKET shift and go to state 46
+    LEFT_CURLY_BRACKET shift and go to state 47
 
+    funcBody                       shift and go to state 46
 
 state 40
 
-    (17) funcs_aux -> FUNC CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN . LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+    (17) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN . RIGHT_PAREN funcBody
 
-    LEFT_CURLY_BRACKET shift and go to state 47
+    RIGHT_PAREN     shift and go to state 48
 
 
 state 41
 
     (10) vars_type -> CTE_ID . saveVariableID COMMA vars_type
     (11) vars_type -> CTE_ID . saveVariableID SEMI_COLON vars
-    (24) saveVariableID -> .
+    (28) saveVariableID -> .
 
-    COMMA           reduce using rule 24 (saveVariableID -> .)
-    SEMI_COLON      reduce using rule 24 (saveVariableID -> .)
+    COMMA           reduce using rule 28 (saveVariableID -> .)
+    SEMI_COLON      reduce using rule 28 (saveVariableID -> .)
 
-    saveVariableID                 shift and go to state 48
+    saveVariableID                 shift and go to state 49
 
 state 42
 
@@ -557,6 +578,7 @@ state 42
 
     FUNC            reduce using rule 10 (vars_type -> CTE_ID saveVariableID COMMA vars_type .)
     MAIN            reduce using rule 10 (vars_type -> CTE_ID saveVariableID COMMA vars_type .)
+    RIGHT_CURLY_BRACKET reduce using rule 10 (vars_type -> CTE_ID saveVariableID COMMA vars_type .)
 
 
 state 43
@@ -565,6 +587,7 @@ state 43
 
     FUNC            reduce using rule 11 (vars_type -> CTE_ID saveVariableID SEMI_COLON vars .)
     MAIN            reduce using rule 11 (vars_type -> CTE_ID saveVariableID SEMI_COLON vars .)
+    RIGHT_CURLY_BRACKET reduce using rule 11 (vars_type -> CTE_ID saveVariableID SEMI_COLON vars .)
 
 
 state 44
@@ -573,6 +596,7 @@ state 44
 
     FUNC            reduce using rule 9 (vars -> empty .)
     MAIN            reduce using rule 9 (vars -> empty .)
+    RIGHT_CURLY_BRACKET reduce using rule 9 (vars -> empty .)
 
 
 state 45
@@ -582,24 +606,45 @@ state 45
     (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
     (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
 
-    RIGHT_BRACKET   shift and go to state 49
+    RIGHT_BRACKET   shift and go to state 50
 
 
 state 46
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET . RIGHT_CURLY_BRACKET
+    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody . endPrint
+    (26) endPrint -> .
 
-    RIGHT_CURLY_BRACKET shift and go to state 50
+    $end            reduce using rule 26 (endPrint -> .)
 
+    endPrint                       shift and go to state 51
 
 state 47
 
-    (17) funcs_aux -> FUNC CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET . RIGHT_CURLY_BRACKET
+    (18) funcBody -> LEFT_CURLY_BRACKET . auxFuncBody RIGHT_CURLY_BRACKET
+    (19) auxFuncBody -> . vars
+    (6) vars -> . VAR type vars_type
+    (7) vars -> . VAR type vars_type_array
+    (8) vars -> . VAR type vars_type_matrix
+    (9) vars -> . empty
+    (30) empty -> .
 
-    RIGHT_CURLY_BRACKET shift and go to state 51
+    VAR             shift and go to state 9
+    RIGHT_CURLY_BRACKET reduce using rule 30 (empty -> .)
 
+    auxFuncBody                    shift and go to state 52
+    vars                           shift and go to state 53
+    empty                          shift and go to state 44
 
 state 48
+
+    (17) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN . funcBody
+    (18) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+
+    LEFT_CURLY_BRACKET shift and go to state 47
+
+    funcBody                       shift and go to state 54
+
+state 49
 
     (10) vars_type -> CTE_ID saveVariableID . COMMA vars_type
     (11) vars_type -> CTE_ID saveVariableID . SEMI_COLON vars
@@ -608,225 +653,254 @@ state 48
     SEMI_COLON      shift and go to state 37
 
 
-state 49
+state 50
 
     (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_array
     (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON vars
     (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
     (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
 
-    COMMA           shift and go to state 53
-    SEMI_COLON      shift and go to state 54
-    LEFT_BRACKET    shift and go to state 52
-
-
-state 50
-
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET .
-
-    $end            reduce using rule 1 (program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET .)
+    COMMA           shift and go to state 56
+    SEMI_COLON      shift and go to state 57
+    LEFT_BRACKET    shift and go to state 55
 
 
 state 51
 
-    (17) funcs_aux -> FUNC CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET .
+    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint .
 
-    FUNC            reduce using rule 17 (funcs_aux -> FUNC CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET .)
-    MAIN            reduce using rule 17 (funcs_aux -> FUNC CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET .)
+    $end            reduce using rule 1 (program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint .)
 
 
 state 52
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET . CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET . CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (18) funcBody -> LEFT_CURLY_BRACKET auxFuncBody . RIGHT_CURLY_BRACKET
 
-    CTE_INT         shift and go to state 55
+    RIGHT_CURLY_BRACKET shift and go to state 58
 
 
 state 53
+
+    (19) auxFuncBody -> vars .
+
+    RIGHT_CURLY_BRACKET reduce using rule 19 (auxFuncBody -> vars .)
+
+
+state 54
+
+    (17) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody .
+
+    FUNC            reduce using rule 17 (funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody .)
+    MAIN            reduce using rule 17 (funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody .)
+
+
+state 55
+
+    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET . CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET . CTE_INT RIGHT_BRACKET SEMI_COLON vars
+
+    CTE_INT         shift and go to state 59
+
+
+state 56
 
     (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA . vars_type_array
     (12) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
     (13) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
 
-    CTE_ID          shift and go to state 56
+    CTE_ID          shift and go to state 60
 
-    vars_type_array                shift and go to state 57
+    vars_type_array                shift and go to state 61
 
-state 54
+state 57
 
     (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON . vars
     (6) vars -> . VAR type vars_type
     (7) vars -> . VAR type vars_type_array
     (8) vars -> . VAR type vars_type_matrix
     (9) vars -> . empty
-    (26) empty -> .
+    (30) empty -> .
 
     VAR             shift and go to state 9
-    FUNC            reduce using rule 26 (empty -> .)
-    MAIN            reduce using rule 26 (empty -> .)
+    FUNC            reduce using rule 30 (empty -> .)
+    MAIN            reduce using rule 30 (empty -> .)
+    RIGHT_CURLY_BRACKET reduce using rule 30 (empty -> .)
 
-    vars                           shift and go to state 58
+    vars                           shift and go to state 62
     empty                          shift and go to state 44
 
-state 55
+state 58
+
+    (18) funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .
+
+    $end            reduce using rule 18 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    FUNC            reduce using rule 18 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    MAIN            reduce using rule 18 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+
+
+state 59
 
     (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT . RIGHT_BRACKET COMMA vars_type_matrix
     (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT . RIGHT_BRACKET SEMI_COLON vars
 
-    RIGHT_BRACKET   shift and go to state 59
+    RIGHT_BRACKET   shift and go to state 63
 
 
-state 56
+state 60
 
     (12) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
     (13) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (24) saveVariableID -> .
+    (28) saveVariableID -> .
 
-    LEFT_BRACKET    reduce using rule 24 (saveVariableID -> .)
+    LEFT_BRACKET    reduce using rule 28 (saveVariableID -> .)
 
-    saveVariableID                 shift and go to state 60
+    saveVariableID                 shift and go to state 64
 
-state 57
+state 61
 
     (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .
 
     FUNC            reduce using rule 12 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
     MAIN            reduce using rule 12 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
+    RIGHT_CURLY_BRACKET reduce using rule 12 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
 
 
-state 58
+state 62
 
     (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .
 
     FUNC            reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
     MAIN            reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
+    RIGHT_CURLY_BRACKET reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
 
 
-state 59
+state 63
 
     (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_matrix
     (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON vars
 
-    COMMA           shift and go to state 61
-    SEMI_COLON      shift and go to state 62
+    COMMA           shift and go to state 65
+    SEMI_COLON      shift and go to state 66
 
 
-state 60
+state 64
 
     (12) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
     (13) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
 
-    LEFT_BRACKET    shift and go to state 63
+    LEFT_BRACKET    shift and go to state 67
 
 
-state 61
+state 65
 
     (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA . vars_type_matrix
     (14) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
     (15) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
 
-    CTE_ID          shift and go to state 64
+    CTE_ID          shift and go to state 68
 
-    vars_type_matrix               shift and go to state 65
+    vars_type_matrix               shift and go to state 69
 
-state 62
+state 66
 
     (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON . vars
     (6) vars -> . VAR type vars_type
     (7) vars -> . VAR type vars_type_array
     (8) vars -> . VAR type vars_type_matrix
     (9) vars -> . empty
-    (26) empty -> .
+    (30) empty -> .
 
     VAR             shift and go to state 9
-    FUNC            reduce using rule 26 (empty -> .)
-    MAIN            reduce using rule 26 (empty -> .)
+    FUNC            reduce using rule 30 (empty -> .)
+    MAIN            reduce using rule 30 (empty -> .)
+    RIGHT_CURLY_BRACKET reduce using rule 30 (empty -> .)
 
-    vars                           shift and go to state 66
+    vars                           shift and go to state 70
     empty                          shift and go to state 44
 
-state 63
+state 67
 
     (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET COMMA vars_type_array
     (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET SEMI_COLON vars
 
-    CTE_INT         shift and go to state 67
+    CTE_INT         shift and go to state 71
 
 
-state 64
+state 68
 
     (14) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
     (15) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (24) saveVariableID -> .
+    (28) saveVariableID -> .
 
-    LEFT_BRACKET    reduce using rule 24 (saveVariableID -> .)
+    LEFT_BRACKET    reduce using rule 28 (saveVariableID -> .)
 
-    saveVariableID                 shift and go to state 68
+    saveVariableID                 shift and go to state 72
 
-state 65
+state 69
 
     (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .
 
     FUNC            reduce using rule 14 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
     MAIN            reduce using rule 14 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
+    RIGHT_CURLY_BRACKET reduce using rule 14 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
 
 
-state 66
+state 70
 
     (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .
 
     FUNC            reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
     MAIN            reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
-
-
-state 67
-
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET SEMI_COLON vars
-
-    RIGHT_BRACKET   shift and go to state 69
-
-
-state 68
-
-    (14) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-
-    LEFT_BRACKET    shift and go to state 70
-
-
-state 69
-
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON vars
-
-    COMMA           shift and go to state 53
-    SEMI_COLON      shift and go to state 54
-
-
-state 70
-
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-
-    CTE_INT         shift and go to state 71
+    RIGHT_CURLY_BRACKET reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
 
 
 state 71
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET COMMA vars_type_array
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET SEMI_COLON vars
 
-    RIGHT_BRACKET   shift and go to state 72
+    RIGHT_BRACKET   shift and go to state 73
 
 
 state 72
 
+    (14) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (15) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+
+    LEFT_BRACKET    shift and go to state 74
+
+
+state 73
+
+    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_array
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON vars
+
+    COMMA           shift and go to state 56
+    SEMI_COLON      shift and go to state 57
+
+
+state 74
+
+    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+
+    CTE_INT         shift and go to state 75
+
+
+state 75
+
+    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+
+    RIGHT_BRACKET   shift and go to state 76
+
+
+state 76
+
     (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
     (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
 
-    LEFT_BRACKET    shift and go to state 52
+    LEFT_BRACKET    shift and go to state 55
 
 WARNING: 
 WARNING: Conflicts:

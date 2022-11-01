@@ -7,11 +7,12 @@ var bool flag;
 var int arr[2];
 var int mat[2][2];
 
-func sumarAlgo() {
-    
+func int sumarAlgo() {
+    var float aiuda;
+
 }
 
-func restarAlgo() {
+func int restarAlgo() {
 
 }
 

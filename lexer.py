@@ -27,7 +27,8 @@ reserved = {
     'string': 'STRING',
     'true': 'TRUE',
     'false': 'FALSE',
-    'void': 'VOID'
+    'void': 'VOID',
+    'readInput' : 'READ_INPUT'
 }
 
 # Regexp
