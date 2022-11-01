@@ -255,7 +255,7 @@ def p_startup(p):
 
     program = p[-1]
     funcID = program
-    variablesTable[program] = {'type' : 'void', 'vars' : {}}
+    #variablesTable[program] = {'type' : 'void', 'vars' : {}}
 
 def p_endPrint(p):
     'endPrint :'
