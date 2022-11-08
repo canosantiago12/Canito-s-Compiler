@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'AND BINOMIAL BOOL COMMA CTE_BOOL CTE_FLOAT CTE_ID CTE_INT DIV ELSE EQUAL EXP FALSE FLOAT FOR FUNC GREATER_EQUAL_THAN GREATER_THAN IF INT LEFT_BRACKET LEFT_CURLY_BRACKET LEFT_PAREN LESS_EQUAL_THAN LESS_THAN MAIN MEAN MEDIAN MINUS MOD MODE NOT_EQUAL OR PLOT PLUS POISSON PRINT PROGRAM READ_INPUT RETURN RIGHT_BRACKET RIGHT_CURLY_BRACKET RIGHT_PAREN SEMI_COLON STANDARD_DEVIATION STRING TIMES TRUE VAR VARIANCE VOID WHILE\n    program_main : PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint\n    \n    globalVariables : vars\n                    | empty\n    \n    globalFunctions : funcs\n                    | empty\n    \n    vars : VAR type vars_type\n         | VAR type vars_type_array\n         | VAR type vars_type_matrix\n         | empty\n    \n    vars_type : CTE_ID saveVariableID COMMA vars_type\n              | CTE_ID saveVariableID SEMI_COLON vars\n    \n    vars_type_array : CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array\n                    | CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars\n    \n    vars_type_matrix : CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix\n                     | CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars\n    \n    funcs : funcs_aux globalFunctions\n    \n    funcs_aux : FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody\n    \n    funcBody : LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET\n    \n    auxFuncBody : vars\n    \n    read : READ_INPUT LEFT_PAREN RIGHT_PAREN SEMI_COLON\n    \n    type : INT setCurrentType\n         | FLOAT setCurrentType\n         | BOOL setCurrentType\n         | STRING setCurrentType\n    startup :endPrint :saveFuncID :saveVariableID :setCurrentType :empty :'
+_lr_signature = 'AND BINOMIAL BOOL COMMA CTE_BOOL CTE_FLOAT CTE_ID CTE_INT DIV ELSE EQUAL EQUALS EXP FALSE FLOAT FOR FUNC GREATER_EQUAL_THAN GREATER_THAN IF INT LEFT_BRACKET LEFT_CURLY_BRACKET LEFT_PAREN LESS_EQUAL_THAN LESS_THAN MAIN MEAN MEDIAN MINUS MOD MODE NOT_EQUALS OR PLOT PLUS POISSON PRINT PROGRAM READ_INPUT RETURN RIGHT_BRACKET RIGHT_CURLY_BRACKET RIGHT_PAREN SEMI_COLON STANDARD_DEVIATION STRING TIMES TRUE VAR VARIANCE VOID WHILE\n    program_main : PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint\n    \n    globalVariables : vars\n                    | empty\n    \n    globalFunctions : funcs\n                    | empty\n    \n    vars : auxVars\n    \n    auxVars : VAR type vars_type_single\n            | VAR type vars_type_array\n            | VAR type vars_type_matrix\n            | empty\n    \n    vars_type_single : CTE_ID saveVariableID COMMA vars_type_single\n                     | CTE_ID saveVariableID SEMI_COLON auxVars\n    \n    vars_type_array : CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array\n                    | CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars\n    \n    vars_type_matrix : CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix\n                     | CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars\n    \n    funcs : funcs_aux globalFunctions\n    \n    funcs_aux : FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endFunction\n    \n    funcBody : LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET\n    \n    auxFuncBody : vars statements auxFuncBody\n                | statements auxFuncBody\n                | empty\n    \n    type : INT setCurrentType\n         | FLOAT setCurrentType\n         | BOOL setCurrentType\n         | STRING setCurrentType\n    \n    statements : assignment\n    \n    assignment : CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON\n    \n    logicExpression : exp auxLogicExpression\n    \n    auxLogicExpression : AND logicExpression\n                       | OR logicExpression\n                       | empty\n    \n    exp : exp2 auxExp\n    \n    auxExp : GREATER_THAN exp\n           | GREATER_EQUAL_THAN exp\n           | LESS_THAN exp\n           | LESS_EQUAL_THAN exp\n           | NOT_EQUALS exp\n           | EQUALS exp\n           | empty\n    \n    exp2 : term doExpression exp2Aux\n    \n    exp2Aux : PLUS addOperator exp2\n            | MINUS addOperator exp2\n            | empty\n    \n    term : factor auxTerm\n    \n    auxTerm : TIMES term\n            | DIV term\n            | MOD term\n            | EXP term\n            | empty\n    \n    factor : constants\n    \n    constants : CTE_ID addOperand\n              | CTE_INT\n              | CTE_FLOAT\n              | TRUE\n              | FALSE\n    startup :endPrint :saveFuncID :endFunction :saveVariableID :setCurrentType :addOperand :addOperator :doExpression :doAssign :empty :'
     
-_lr_action_items = {'PROGRAM':([0,],[2,]),'$end':([1,46,51,58,],[0,-26,-1,-18,]),'CTE_ID':([2,15,16,17,18,19,22,27,28,29,30,36,56,65,],[3,26,-29,-29,-29,-29,32,-21,-22,-23,-24,41,60,68,]),'SEMI_COLON':([3,4,26,33,41,49,50,63,73,],[-25,5,-28,37,-28,37,57,66,57,]),'VAR':([5,37,47,57,66,],[9,9,9,9,9,]),'FUNC':([5,6,7,8,13,23,24,25,37,42,43,44,54,57,58,61,62,66,69,70,],[-30,14,-2,-3,14,-6,-7,-8,-30,-10,-11,-9,-17,-30,-18,-12,-13,-30,-14,-15,]),'MAIN':([5,6,7,8,10,11,12,13,21,23,24,25,37,42,43,44,54,57,58,61,62,66,69,70,],[-30,-30,-2,-3,20,-4,-5,-30,-16,-6,-7,-8,-30,-10,-11,-9,-17,-30,-18,-12,-13,-30,-14,-15,]),'INT':([9,14,],[16,16,]),'FLOAT':([9,14,],[17,17,]),'BOOL':([9,14,],[18,18,]),'STRING':([9,14,],[19,19,]),'LEFT_PAREN':([20,31,32,35,],[-27,34,-27,40,]),'RIGHT_CURLY_BRACKET':([23,24,25,37,42,43,44,47,52,53,57,61,62,66,69,70,],[-6,-7,-8,-30,-10,-11,-9,-30,58,-19,-30,-12,-13,-30,-14,-15,]),'COMMA':([26,33,41,49,50,63,73,],[-28,36,-28,36,56,65,56,]),'LEFT_BRACKET':([26,33,50,60,64,68,72,76,],[-28,38,55,-28,67,-28,74,55,]),'RIGHT_PAREN':([34,40,],[39,48,]),'CTE_INT':([38,55,67,74,],[45,59,71,75,]),'LEFT_CURLY_BRACKET':([39,48,],[47,47,]),'RIGHT_BRACKET':([45,59,71,75,],[50,63,73,76,]),}
+_lr_action_items = {'PROGRAM':([0,],[2,]),'$end':([1,47,52,63,],[0,-58,-1,-19,]),'CTE_ID':([2,9,16,17,18,19,20,23,24,25,26,28,29,30,31,37,38,43,44,45,48,54,55,56,57,61,62,64,70,71,73,76,77,78,92,93,98,99,102,103,104,105,106,107,111,112,113,114,118,128,129,136,137,],[3,-6,27,-62,-62,-62,-62,33,-7,-8,-9,-23,-24,-25,-26,42,-67,-11,-12,-10,58,58,58,-10,-27,69,-67,58,-13,-14,-64,80,91,-67,-15,-16,80,80,80,80,80,80,80,80,80,80,80,80,-28,-64,-64,80,80,]),'SEMI_COLON':([3,4,27,34,42,50,51,74,80,81,82,83,84,85,86,87,88,89,90,95,96,97,100,101,108,109,110,115,117,119,120,121,122,123,124,125,126,127,130,131,132,133,134,139,140,],[-57,5,-61,38,-61,38,62,78,-63,-66,-67,-67,-65,-67,-51,-53,-54,-55,-56,-52,118,-29,-32,-33,-40,-67,-45,-50,62,-30,-31,-34,-35,-36,-37,-38,-39,-41,-44,-46,-47,-48,-49,-42,-43,]),'FUNC':([5,6,7,8,9,14,24,25,26,38,43,44,45,59,62,63,67,70,71,78,92,93,],[-67,15,-2,-3,-6,15,-7,-8,-9,-67,-11,-12,-10,-60,-67,-19,-18,-13,-14,-67,-15,-16,]),'MAIN':([5,6,7,8,9,11,12,13,14,22,24,25,26,38,43,44,45,59,62,63,67,70,71,78,92,93,],[-67,-67,-2,-3,-6,21,-4,-5,-67,-17,-7,-8,-9,-67,-11,-12,-10,-60,-67,-19,-18,-13,-14,-67,-15,-16,]),'VAR':([5,38,48,55,57,62,64,78,118,],[10,10,10,10,-27,10,10,10,-28,]),'INT':([10,15,],[17,17,]),'FLOAT':([10,15,],[18,18,]),'BOOL':([10,15,],[19,19,]),'STRING':([10,15,],[20,20,]),'LEFT_PAREN':([21,32,33,36,],[-59,35,-59,41,]),'COMMA':([27,34,42,50,51,74,117,],[-61,37,-61,37,61,77,61,]),'LEFT_BRACKET':([27,34,51,69,75,91,116,141,],[-61,39,60,-61,79,-61,135,60,]),'RIGHT_PAREN':([35,41,],[40,49,]),'CTE_INT':([39,60,73,76,79,98,99,102,103,104,105,106,107,111,112,113,114,128,129,135,136,137,],[46,68,-64,87,94,87,87,87,87,87,87,87,87,87,87,87,87,-64,-64,138,87,87,]),'LEFT_CURLY_BRACKET':([40,49,],[48,48,]),'RIGHT_BRACKET':([46,68,94,138,],[51,74,117,141,]),'RIGHT_CURLY_BRACKET':([48,53,55,56,57,64,65,72,118,],[-67,63,-67,-22,-27,-67,-21,-20,-28,]),'EQUAL':([58,66,],[-63,73,]),'CTE_FLOAT':([73,76,98,99,102,103,104,105,106,107,111,112,113,114,128,129,136,137,],[-64,88,88,88,88,88,88,88,88,88,88,88,88,88,-64,-64,88,88,]),'TRUE':([73,76,98,99,102,103,104,105,106,107,111,112,113,114,128,129,136,137,],[-64,89,89,89,89,89,89,89,89,89,89,89,89,89,-64,-64,89,89,]),'FALSE':([73,76,98,99,102,103,104,105,106,107,111,112,113,114,128,129,136,137,],[-64,90,90,90,90,90,90,90,90,90,90,90,90,90,-64,-64,90,90,]),'TIMES':([80,85,86,87,88,89,90,95,],[-63,111,-51,-53,-54,-55,-56,-52,]),'DIV':([80,85,86,87,88,89,90,95,],[-63,112,-51,-53,-54,-55,-56,-52,]),'MOD':([80,85,86,87,88,89,90,95,],[-63,113,-51,-53,-54,-55,-56,-52,]),'EXP':([80,85,86,87,88,89,90,95,],[-63,114,-51,-53,-54,-55,-56,-52,]),'PLUS':([80,84,85,86,87,88,89,90,95,109,110,115,131,132,133,134,],[-63,-65,-67,-51,-53,-54,-55,-56,-52,128,-45,-50,-46,-47,-48,-49,]),'MINUS':([80,84,85,86,87,88,89,90,95,109,110,115,131,132,133,134,],[-63,-65,-67,-51,-53,-54,-55,-56,-52,129,-45,-50,-46,-47,-48,-49,]),'GREATER_THAN':([80,83,84,85,86,87,88,89,90,95,109,110,115,127,130,131,132,133,134,139,140,],[-63,102,-65,-67,-51,-53,-54,-55,-56,-52,-67,-45,-50,-41,-44,-46,-47,-48,-49,-42,-43,]),'GREATER_EQUAL_THAN':([80,83,84,85,86,87,88,89,90,95,109,110,115,127,130,131,132,133,134,139,140,],[-63,103,-65,-67,-51,-53,-54,-55,-56,-52,-67,-45,-50,-41,-44,-46,-47,-48,-49,-42,-43,]),'LESS_THAN':([80,83,84,85,86,87,88,89,90,95,109,110,115,127,130,131,132,133,134,139,140,],[-63,104,-65,-67,-51,-53,-54,-55,-56,-52,-67,-45,-50,-41,-44,-46,-47,-48,-49,-42,-43,]),'LESS_EQUAL_THAN':([80,83,84,85,86,87,88,89,90,95,109,110,115,127,130,131,132,133,134,139,140,],[-63,105,-65,-67,-51,-53,-54,-55,-56,-52,-67,-45,-50,-41,-44,-46,-47,-48,-49,-42,-43,]),'NOT_EQUALS':([80,83,84,85,86,87,88,89,90,95,109,110,115,127,130,131,132,133,134,139,140,],[-63,106,-65,-67,-51,-53,-54,-55,-56,-52,-67,-45,-50,-41,-44,-46,-47,-48,-49,-42,-43,]),'EQUALS':([80,83,84,85,86,87,88,89,90,95,109,110,115,127,130,131,132,133,134,139,140,],[-63,107,-65,-67,-51,-53,-54,-55,-56,-52,-67,-45,-50,-41,-44,-46,-47,-48,-49,-42,-43,]),'AND':([80,82,83,84,85,86,87,88,89,90,95,101,108,109,110,115,121,122,123,124,125,126,127,130,131,132,133,134,139,140,],[-63,98,-67,-65,-67,-51,-53,-54,-55,-56,-52,-33,-40,-67,-45,-50,-34,-35,-36,-37,-38,-39,-41,-44,-46,-47,-48,-49,-42,-43,]),'OR':([80,82,83,84,85,86,87,88,89,90,95,101,108,109,110,115,121,122,123,124,125,126,127,130,131,132,133,134,139,140,],[-63,99,-67,-65,-67,-51,-53,-54,-55,-56,-52,-33,-40,-67,-45,-50,-34,-35,-36,-37,-38,-39,-41,-44,-46,-47,-48,-49,-42,-43,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'program_main':([0,],[1,]),'startup':([3,],[4,]),'globalVariables':([5,],[6,]),'vars':([5,37,47,57,66,],[7,43,53,62,70,]),'empty':([5,6,13,37,47,57,66,],[8,12,12,44,44,44,44,]),'globalFunctions':([6,13,],[10,21,]),'funcs':([6,13,],[11,11,]),'funcs_aux':([6,13,],[13,13,]),'type':([9,14,],[15,22,]),'vars_type':([15,36,],[23,42,]),'vars_type_array':([15,56,],[24,61,]),'vars_type_matrix':([15,65,],[25,69,]),'setCurrentType':([16,17,18,19,],[27,28,29,30,]),'saveFuncID':([20,32,],[31,35,]),'saveVariableID':([26,41,60,68,],[33,49,64,72,]),'funcBody':([39,48,],[46,54,]),'endPrint':([46,],[51,]),'auxFuncBody':([47,],[52,]),}
+_lr_goto_items = {'program_main':([0,],[1,]),'startup':([3,],[4,]),'globalVariables':([5,],[6,]),'vars':([5,48,55,64,],[7,54,54,54,]),'empty':([5,6,14,38,48,55,62,64,78,82,83,85,109,],[8,13,13,45,56,56,45,56,45,100,108,115,130,]),'auxVars':([5,38,48,55,62,64,78,],[9,44,9,9,71,9,93,]),'globalFunctions':([6,14,],[11,22,]),'funcs':([6,14,],[12,12,]),'funcs_aux':([6,14,],[14,14,]),'type':([10,15,],[16,23,]),'vars_type_single':([16,37,],[24,43,]),'vars_type_array':([16,61,],[25,70,]),'vars_type_matrix':([16,77,],[26,92,]),'setCurrentType':([17,18,19,20,],[28,29,30,31,]),'saveFuncID':([21,33,],[32,36,]),'saveVariableID':([27,42,69,91,],[34,50,75,116,]),'funcBody':([40,49,],[47,59,]),'endPrint':([47,],[52,]),'auxFuncBody':([48,55,64,],[53,65,72,]),'statements':([48,54,55,64,],[55,64,55,55,]),'assignment':([48,54,55,64,],[57,57,57,57,]),'addOperand':([58,80,],[66,95,]),'endFunction':([59,],[67,]),'addOperator':([73,128,129,],[76,136,137,]),'logicExpression':([76,98,99,],[81,119,120,]),'exp':([76,98,99,102,103,104,105,106,107,],[82,82,82,121,122,123,124,125,126,]),'exp2':([76,98,99,102,103,104,105,106,107,136,137,],[83,83,83,83,83,83,83,83,83,139,140,]),'term':([76,98,99,102,103,104,105,106,107,111,112,113,114,136,137,],[84,84,84,84,84,84,84,84,84,131,132,133,134,84,84,]),'factor':([76,98,99,102,103,104,105,106,107,111,112,113,114,136,137,],[85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,]),'constants':([76,98,99,102,103,104,105,106,107,111,112,113,114,136,137,],[86,86,86,86,86,86,86,86,86,86,86,86,86,86,86,]),'doAssign':([81,],[96,]),'auxLogicExpression':([82,],[97,]),'auxExp':([83,],[101,]),'doExpression':([84,],[109,]),'auxTerm':([85,],[110,]),'exp2Aux':([109,],[127,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,34 +27,71 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> program_main","S'",1,None,None,None),
-  ('program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint','program_main',12,'p_mainFunction','parser.py',173),
-  ('globalVariables -> vars','globalVariables',1,'p_globalVariables','parser.py',178),
-  ('globalVariables -> empty','globalVariables',1,'p_globalVariables','parser.py',179),
-  ('globalFunctions -> funcs','globalFunctions',1,'p_globalFunctions','parser.py',184),
-  ('globalFunctions -> empty','globalFunctions',1,'p_globalFunctions','parser.py',185),
-  ('vars -> VAR type vars_type','vars',3,'p_vars','parser.py',191),
-  ('vars -> VAR type vars_type_array','vars',3,'p_vars','parser.py',192),
-  ('vars -> VAR type vars_type_matrix','vars',3,'p_vars','parser.py',193),
-  ('vars -> empty','vars',1,'p_vars','parser.py',194),
-  ('vars_type -> CTE_ID saveVariableID COMMA vars_type','vars_type',4,'p_vars_type','parser.py',199),
-  ('vars_type -> CTE_ID saveVariableID SEMI_COLON vars','vars_type',4,'p_vars_type','parser.py',200),
-  ('vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array','vars_type_array',7,'p_vars_type_array','parser.py',205),
-  ('vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars','vars_type_array',7,'p_vars_type_array','parser.py',206),
-  ('vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix','vars_type_matrix',10,'p_vars_type_matrix','parser.py',211),
-  ('vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars','vars_type_matrix',10,'p_vars_type_matrix','parser.py',212),
-  ('funcs -> funcs_aux globalFunctions','funcs',2,'p_funcs','parser.py',218),
-  ('funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody','funcs_aux',7,'p_funcs_aux','parser.py',223),
-  ('funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET','funcBody',3,'p_funcBody','parser.py',228),
-  ('auxFuncBody -> vars','auxFuncBody',1,'p_auxFuncBody','parser.py',233),
-  ('read -> READ_INPUT LEFT_PAREN RIGHT_PAREN SEMI_COLON','read',4,'p_read','parser.py',239),
-  ('type -> INT setCurrentType','type',2,'p_type','parser.py',245),
-  ('type -> FLOAT setCurrentType','type',2,'p_type','parser.py',246),
-  ('type -> BOOL setCurrentType','type',2,'p_type','parser.py',247),
-  ('type -> STRING setCurrentType','type',2,'p_type','parser.py',248),
-  ('startup -> <empty>','startup',0,'p_startup','parser.py',253),
-  ('endPrint -> <empty>','endPrint',0,'p_endPrint','parser.py',261),
-  ('saveFuncID -> <empty>','saveFuncID',0,'p_saveFuncID','parser.py',265),
-  ('saveVariableID -> <empty>','saveVariableID',0,'p_saveVariableID','parser.py',277),
-  ('setCurrentType -> <empty>','setCurrentType',0,'p_setCurrentType','parser.py',289),
-  ('empty -> <empty>','empty',0,'p_empty','parser.py',302),
+  ('program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint','program_main',12,'p_mainFunction','parser.py',183),
+  ('globalVariables -> vars','globalVariables',1,'p_globalVariables','parser.py',188),
+  ('globalVariables -> empty','globalVariables',1,'p_globalVariables','parser.py',189),
+  ('globalFunctions -> funcs','globalFunctions',1,'p_globalFunctions','parser.py',194),
+  ('globalFunctions -> empty','globalFunctions',1,'p_globalFunctions','parser.py',195),
+  ('vars -> auxVars','vars',1,'p_vars','parser.py',201),
+  ('auxVars -> VAR type vars_type_single','auxVars',3,'p_auxVars','parser.py',206),
+  ('auxVars -> VAR type vars_type_array','auxVars',3,'p_auxVars','parser.py',207),
+  ('auxVars -> VAR type vars_type_matrix','auxVars',3,'p_auxVars','parser.py',208),
+  ('auxVars -> empty','auxVars',1,'p_auxVars','parser.py',209),
+  ('vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single','vars_type_single',4,'p_vars_type_single','parser.py',214),
+  ('vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars','vars_type_single',4,'p_vars_type_single','parser.py',215),
+  ('vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array','vars_type_array',7,'p_vars_type_array','parser.py',220),
+  ('vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars','vars_type_array',7,'p_vars_type_array','parser.py',221),
+  ('vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix','vars_type_matrix',10,'p_vars_type_matrix','parser.py',226),
+  ('vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars','vars_type_matrix',10,'p_vars_type_matrix','parser.py',227),
+  ('funcs -> funcs_aux globalFunctions','funcs',2,'p_funcs','parser.py',233),
+  ('funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endFunction','funcs_aux',8,'p_funcs_aux','parser.py',238),
+  ('funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET','funcBody',3,'p_funcBody','parser.py',243),
+  ('auxFuncBody -> vars statements auxFuncBody','auxFuncBody',3,'p_auxFuncBody','parser.py',248),
+  ('auxFuncBody -> statements auxFuncBody','auxFuncBody',2,'p_auxFuncBody','parser.py',249),
+  ('auxFuncBody -> empty','auxFuncBody',1,'p_auxFuncBody','parser.py',250),
+  ('type -> INT setCurrentType','type',2,'p_type','parser.py',262),
+  ('type -> FLOAT setCurrentType','type',2,'p_type','parser.py',263),
+  ('type -> BOOL setCurrentType','type',2,'p_type','parser.py',264),
+  ('type -> STRING setCurrentType','type',2,'p_type','parser.py',265),
+  ('statements -> assignment','statements',1,'p_statements','parser.py',271),
+  ('assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON','assignment',7,'p_assignment','parser.py',277),
+  ('logicExpression -> exp auxLogicExpression','logicExpression',2,'p_logicExpression','parser.py',283),
+  ('auxLogicExpression -> AND logicExpression','auxLogicExpression',2,'p_auxLogicExpression','parser.py',288),
+  ('auxLogicExpression -> OR logicExpression','auxLogicExpression',2,'p_auxLogicExpression','parser.py',289),
+  ('auxLogicExpression -> empty','auxLogicExpression',1,'p_auxLogicExpression','parser.py',290),
+  ('exp -> exp2 auxExp','exp',2,'p_exp','parser.py',295),
+  ('auxExp -> GREATER_THAN exp','auxExp',2,'p_auxExp','parser.py',300),
+  ('auxExp -> GREATER_EQUAL_THAN exp','auxExp',2,'p_auxExp','parser.py',301),
+  ('auxExp -> LESS_THAN exp','auxExp',2,'p_auxExp','parser.py',302),
+  ('auxExp -> LESS_EQUAL_THAN exp','auxExp',2,'p_auxExp','parser.py',303),
+  ('auxExp -> NOT_EQUALS exp','auxExp',2,'p_auxExp','parser.py',304),
+  ('auxExp -> EQUALS exp','auxExp',2,'p_auxExp','parser.py',305),
+  ('auxExp -> empty','auxExp',1,'p_auxExp','parser.py',306),
+  ('exp2 -> term doExpression exp2Aux','exp2',3,'p_exp2','parser.py',311),
+  ('exp2Aux -> PLUS addOperator exp2','exp2Aux',3,'p_exp2Aux','parser.py',316),
+  ('exp2Aux -> MINUS addOperator exp2','exp2Aux',3,'p_exp2Aux','parser.py',317),
+  ('exp2Aux -> empty','exp2Aux',1,'p_exp2Aux','parser.py',318),
+  ('term -> factor auxTerm','term',2,'p_term','parser.py',323),
+  ('auxTerm -> TIMES term','auxTerm',2,'p_auxTerm','parser.py',328),
+  ('auxTerm -> DIV term','auxTerm',2,'p_auxTerm','parser.py',329),
+  ('auxTerm -> MOD term','auxTerm',2,'p_auxTerm','parser.py',330),
+  ('auxTerm -> EXP term','auxTerm',2,'p_auxTerm','parser.py',331),
+  ('auxTerm -> empty','auxTerm',1,'p_auxTerm','parser.py',332),
+  ('factor -> constants','factor',1,'p_factor','parser.py',337),
+  ('constants -> CTE_ID addOperand','constants',2,'p_constants','parser.py',342),
+  ('constants -> CTE_INT','constants',1,'p_constants','parser.py',343),
+  ('constants -> CTE_FLOAT','constants',1,'p_constants','parser.py',344),
+  ('constants -> TRUE','constants',1,'p_constants','parser.py',345),
+  ('constants -> FALSE','constants',1,'p_constants','parser.py',346),
+  ('startup -> <empty>','startup',0,'p_startup','parser.py',357),
+  ('endPrint -> <empty>','endPrint',0,'p_endPrint','parser.py',366),
+  ('saveFuncID -> <empty>','saveFuncID',0,'p_saveFuncID','parser.py',370),
+  ('endFunction -> <empty>','endFunction',0,'p_endFunction','parser.py',383),
+  ('saveVariableID -> <empty>','saveVariableID',0,'p_saveVariableID','parser.py',389),
+  ('setCurrentType -> <empty>','setCurrentType',0,'p_setCurrentType','parser.py',402),
+  ('addOperand -> <empty>','addOperand',0,'p_addOperand','parser.py',409),
+  ('addOperator -> <empty>','addOperator',0,'p_addOperator','parser.py',424),
+  ('doExpression -> <empty>','doExpression',0,'p_doExpression','parser.py',432),
+  ('doAssign -> <empty>','doAssign',0,'p_doAssign','parser.py',467),
+  ('empty -> <empty>','empty',0,'p_empty','parser.py',492),
 ]

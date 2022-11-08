@@ -5,7 +5,7 @@ import ply.lex as lex
 tokens = ('IF', 'ELSE', 'FOR', 'WHILE', 
         'FUNC', 'RETURN', 'MAIN', 'PROGRAM',
         'VAR', 'INT', 'FLOAT', 'BOOL', 'VOID', 'STRING', 'TRUE', 'FALSE', 'CTE_INT', 'CTE_FLOAT', 'CTE_BOOL', 'CTE_ID',
-        'PLUS', 'MINUS', 'TIMES', 'DIV', 'MOD', 'EXP', 'LESS_THAN', 'LESS_EQUAL_THAN', 'GREATER_THAN', 'GREATER_EQUAL_THAN', 'EQUAL', 'NOT_EQUAL', 'AND', 'OR',
+        'PLUS', 'MINUS', 'TIMES', 'DIV', 'MOD', 'EXP', 'EQUAL', 'LESS_THAN', 'LESS_EQUAL_THAN', 'GREATER_THAN', 'GREATER_EQUAL_THAN', 'EQUALS', 'NOT_EQUALS', 'AND', 'OR',
         'LEFT_PAREN', 'RIGHT_PAREN', 'LEFT_BRACKET', 'RIGHT_BRACKET', 'LEFT_CURLY_BRACKET', 'RIGHT_CURLY_BRACKET', 'COMMA', 'SEMI_COLON',
         'MEAN', 'MEDIAN', 'MODE', 'STANDARD_DEVIATION', 'VARIANCE', 'POISSON', 'BINOMIAL', 'PLOT', 'PRINT', 'READ_INPUT'
         )
@@ -38,9 +38,10 @@ t_TIMES = r'\*'
 t_DIV = r'\/'
 t_MOD = r'\%'
 t_EXP = r'\^'
+t_EQUAL = r'\='
 
-t_EQUAL = r'\=\='
-t_NOT_EQUAL = r'\!\='
+t_EQUALS = r'\=\='
+t_NOT_EQUALS = r'\!\='
 t_LESS_THAN = r'\<'
 t_LESS_EQUAL_THAN = r'\<\='
 t_GREATER_THAN = r'\>'

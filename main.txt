@@ -7,15 +7,18 @@ var bool flag;
 var int arr[2];
 var int mat[2][2];
 
-func int sumarAlgo() {
-    var float aiuda;
-
-}
-
 func int restarAlgo() {
+    var int aux2;
 
+    aux2 = x - k;
 }
 
-main() { 
+func int sumarAlgo() {
+    var int aux;
+    
+    aux = x + k;
+}
 
+main() {
+    
 }
