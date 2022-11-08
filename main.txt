@@ -8,9 +8,11 @@ var int arr[2];
 var int mat[2][2];
 
 func int restarAlgo() {
-    var int aux2;
+    var int aux2, aux1;
 
     aux2 = x - k;
+    print(aux2);
+    print("Hola Mundo");
 }
 
 func int sumarAlgo() {

@@ -176,6 +176,10 @@ varID = ''
 varType = ''
 currType = ''
 
+auxConst = 0
+auxVars = 0
+auxTemps = 0
+
 #====== PARSER ======#
 # Main function variables and functions Rules
 def p_mainFunction(p):
@@ -250,6 +254,12 @@ def p_auxFuncBody(p):
                 | empty
     '''
 
+# def p_auxFuncBody(p):
+#     '''
+#     auxFuncBody : statements auxFuncBody
+#                 | empty
+#     '''
+
 # Function return Rules
 # def p_return(p):
 #     '''
@@ -269,7 +279,27 @@ def p_type(p):
 def p_statements(p):
     '''
     statements : assignment
+               | writting
     '''
+
+# Writting Rules
+def p_writting(p):
+    '''
+    writting : PRINT addOperator LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON
+    '''
+
+def p_auxWritting(p):
+    '''
+    auxWritting : logicExpression doWrite
+                | CTE_STRING doWriteString
+                | empty
+    '''
+
+# Reading Rules
+# def p_reading(p):
+#     '''
+#     reading : READ_INPUT addOperator LEFT_PAREN CTE_ID addOperand doReading RIGHT_PAREN SEMI_COLON
+#     '''
 
 # Assing Rules
 def p_assignment(p):
@@ -320,15 +350,15 @@ def p_exp2Aux(p):
 
 def p_term(p):
     '''
-    term : factor auxTerm
+    term : factor doTerm auxTerm
     '''
 
 def p_auxTerm(p):
     '''
-    auxTerm : TIMES term
-            | DIV term
-            | MOD term
-            | EXP term
+    auxTerm : TIMES addOperator term
+            | DIV addOperator term
+            | MOD addOperator term
+            | EXP addOperator term
             | empty
     '''
 
@@ -360,11 +390,22 @@ def p_startup(p):
     programID = p[-1]
     funcID = programID
 
-    variablesTable[programID] = {'type' : 'void', 'vars' : {}}
+    variablesTable[programID] = {'type' : 'void', 'vars' : {}, 'funcConst' : 0, 'funcVars' : 0, 'funcTemps' : 0}
+    newQuad = Quadruple('GOSUB', None, None, 'main')
+    quadruplesList.append(newQuad)
 
 def p_endPrint(p):
     'endPrint :'
     print(variablesTable)
+
+    print(len(quadruplesList))
+
+    for x in quadruplesList:
+        print(x)
+
+    print(operatorStack)
+    print(operandsStack)
+    print(typesStack)
 
 def p_saveFuncID(p):
     'saveFuncID :'
@@ -381,9 +422,7 @@ def p_saveFuncID(p):
 
 def p_endFunction(p):
     'endFunction :'
-    global quadsCont
-    print("RESET MEMORY")
-    quadsCont = 0
+
 
 def p_saveVariableID(p):
     'saveVariableID :'
@@ -446,11 +485,14 @@ def p_doExpression(p):
                 sys.exit()
             else:
                 newQuad = Quadruple(operator, leftOperand, rightOperand, 't' + str(quadsCont))
-                print(newQuad)
                 quadruplesList.append(newQuad)
                 operandsStack.append('t' + str(quadsCont))
                 typesStack.append(CUBE[leftType][rightType][operator])
                 quadsCont += 1
+
+# Terms (TIMES, DIV, MOD, EXP)
+def p_doTerm(p):
+    'doTerm :'
 
 # Assignment
 def p_doAssign(p):
@@ -469,8 +511,35 @@ def p_doAssign(p):
         sys.exit()
     else:
         newQuad = Quadruple(operator, leftOperand, None, rightOperand)
-        print(newQuad)
         quadruplesList.append(newQuad)
+
+# Writting
+def p_doWrite(p):
+    'doWrite :'
+    global operandsStack, operatorStack, quadruplesList, typesStack
+
+    operator = operatorStack.pop()
+    operand = operandsStack.pop()
+    operandType = typesStack.pop()
+    newQuad = Quadruple(operator, None, None, operand)
+    quadruplesList.append(newQuad)
+
+def p_doWriteString(p):
+    'doWriteString :'
+    global operatorStack, quadruplesList
+
+    operator = operatorStack.pop()
+    operand = p[-1]
+    newQuad = Quadruple(operator, None, None, operand)
+    quadruplesList.append(newQuad)\
+
+# Reading
+# def p_doReading(p):
+#     'doReading :'
+#     global operandsStack, operatorStack, quadruplesList, typesStack
+
+#     operator = operatorStack.pop()
+#     opera
 
 # Error handling
 def p_error(p):
