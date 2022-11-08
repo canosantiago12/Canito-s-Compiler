@@ -21,6 +21,14 @@ func int sumarAlgo() {
     aux = x + k;
 }
 
+func float multiplicarAlgo() {
+    var int temp;
+    var float res;
+
+    res = xp * temp;
+    print(res);
+}
+
 main() {
     
 }

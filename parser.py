@@ -315,8 +315,8 @@ def p_logicExpression(p):
 
 def p_auxLogicExpression(p):
     '''
-    auxLogicExpression : AND logicExpression
-                       | OR logicExpression
+    auxLogicExpression : AND addOperator logicExpression
+                       | OR addOperator logicExpression
                        | empty
     '''
 
@@ -327,12 +327,12 @@ def p_exp(p):
 
 def p_auxExp(p):
     '''
-    auxExp : GREATER_THAN exp
-           | GREATER_EQUAL_THAN exp
-           | LESS_THAN exp
-           | LESS_EQUAL_THAN exp
-           | NOT_EQUALS exp
-           | EQUALS exp
+    auxExp : GREATER_THAN addOperator exp
+           | GREATER_EQUAL_THAN addOperator exp
+           | LESS_THAN addOperator exp
+           | LESS_EQUAL_THAN addOperator exp
+           | NOT_EQUALS addOperator exp
+           | EQUALS addOperator exp
            | empty
     '''
 
@@ -493,6 +493,9 @@ def p_doExpression(p):
 # Terms (TIMES, DIV, MOD, EXP)
 def p_doTerm(p):
     'doTerm :'
+    global operandsStack, operatorStack, typesStack, quadruplesList
+
+    
 
 # Assignment
 def p_doAssign(p):
