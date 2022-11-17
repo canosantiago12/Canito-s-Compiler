@@ -3,7 +3,7 @@ import ply.lex as lex
 
 # Tokens
 tokens = ('IF', 'ELSE', 'FOR', 'WHILE', 
-        'FUNC', 'RETURN', 'MAIN', 'PROGRAM',
+        'FUNC', 'RETURN', 'MAIN', 'BTSProgam',
         'VAR', 'INT', 'FLOAT', 'BOOL', 'VOID', 'STRING', 'TRUE', 'FALSE', 'CTE_INT', 'CTE_FLOAT', 'CTE_BOOL', 'CTE_ID', 'CTE_STRING',
         'PLUS', 'MINUS', 'TIMES', 'DIV', 'MOD', 'EXP', 'EQUAL', 'LESS_THAN', 'LESS_EQUAL_THAN', 'GREATER_THAN', 'GREATER_EQUAL_THAN', 'EQUALS', 'NOT_EQUALS', 'AND', 'OR',
         'LEFT_PAREN', 'RIGHT_PAREN', 'LEFT_BRACKET', 'RIGHT_BRACKET', 'LEFT_CURLY_BRACKET', 'RIGHT_CURLY_BRACKET', 'COMMA', 'SEMI_COLON',
@@ -12,8 +12,7 @@ tokens = ('IF', 'ELSE', 'FOR', 'WHILE',
 
 # Reserved words
 reserved = {
-    'program': 'PROGRAM',
-    'main': 'MAIN',
+    'mainStage': 'MAIN',
     'var' : 'VAR',
     'func': 'FUNC',
     'return': 'RETURN',
@@ -64,6 +63,8 @@ t_SEMI_COLON = r'\;'
 t_ignore = " \t"
 
 t_CTE_STRING = r'"(.*?)"'
+# t_CTE_STRING = r"""\"(.*)\"|\'(.*)\'"""
+t_BTSProgam = "BTSProgam"
 
 def t_CTE_ID(t):
     r'([a-z][a-zA-Z0-9]*)'
@@ -88,5 +89,13 @@ def t_skip_newline(t):
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
+
+def t_BLOCK_COMMENT(t):
+    r'(\*\|(.|\n)*?\|\*)'
+    pass
+
+def t_LINE_COMMENT(t):
+    r'\#.*'
+    pass
 
 lexer = lex.lex()
