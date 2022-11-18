@@ -2,160 +2,258 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
 Unused terminals:
 
-    AND
     BINOMIAL
     CTE_BOOL
-    CTE_FLOAT
-    DIV
-    ELSE
-    EQUAL
-    EXP
-    FALSE
-    FOR
-    GREATER_EQUAL_THAN
-    GREATER_THAN
-    IF
-    LESS_EQUAL_THAN
-    LESS_THAN
     MEAN
     MEDIAN
-    MINUS
-    MOD
     MODE
-    NOT_EQUAL
-    OR
     PLOT
-    PLUS
     POISSON
-    PRINT
+    READ_INPUT
     RETURN
     STANDARD_DEVIATION
-    TIMES
-    TRUE
     VARIANCE
     VOID
-    WHILE
 
 Grammar
 
 Rule 0     S' -> program_main
-Rule 1     program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
+Rule 1     program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
 Rule 2     globalVariables -> vars
 Rule 3     globalVariables -> empty
 Rule 4     globalFunctions -> funcs
 Rule 5     globalFunctions -> empty
-Rule 6     vars -> VAR type vars_type
-Rule 7     vars -> VAR type vars_type_array
-Rule 8     vars -> VAR type vars_type_matrix
-Rule 9     vars -> empty
-Rule 10    vars_type -> CTE_ID saveVariableID COMMA vars_type
-Rule 11    vars_type -> CTE_ID saveVariableID SEMI_COLON vars
-Rule 12    vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
-Rule 13    vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-Rule 14    vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-Rule 15    vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-Rule 16    funcs -> funcs_aux globalFunctions
-Rule 17    funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
-Rule 18    funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
-Rule 19    auxFuncBody -> vars
-Rule 20    read -> READ_INPUT LEFT_PAREN RIGHT_PAREN SEMI_COLON
-Rule 21    type -> INT setCurrentType
-Rule 22    type -> FLOAT setCurrentType
-Rule 23    type -> BOOL setCurrentType
-Rule 24    type -> STRING setCurrentType
-Rule 25    startup -> <empty>
-Rule 26    endPrint -> <empty>
-Rule 27    saveFuncID -> <empty>
-Rule 28    saveVariableID -> <empty>
-Rule 29    setCurrentType -> <empty>
-Rule 30    empty -> <empty>
+Rule 6     vars -> auxVars
+Rule 7     auxVars -> VAR type vars_type_single
+Rule 8     auxVars -> VAR type vars_type_array
+Rule 9     auxVars -> VAR type vars_type_matrix
+Rule 10    auxVars -> empty
+Rule 11    vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single
+Rule 12    vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars
+Rule 13    vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
+Rule 14    vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+Rule 15    vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+Rule 16    vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+Rule 17    funcs -> funcs_aux globalFunctions
+Rule 18    funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction
+Rule 19    funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+Rule 20    auxFuncBody -> vars statements auxFuncBody
+Rule 21    auxFuncBody -> statements auxFuncBody
+Rule 22    auxFuncBody -> empty
+Rule 23    type -> INT setCurrentType
+Rule 24    type -> FLOAT setCurrentType
+Rule 25    type -> BOOL setCurrentType
+Rule 26    type -> STRING setCurrentType
+Rule 27    statements -> assignment
+Rule 28    statements -> writting
+Rule 29    statements -> if
+Rule 30    statements -> while
+Rule 31    statements -> for
+Rule 32    writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON
+Rule 33    auxWritting -> logicExpression doWrite multipleWrite
+Rule 34    auxWritting -> CTE_STRING doWriteString multipleWrite
+Rule 35    multipleWrite -> COMMA auxWritting
+Rule 36    multipleWrite -> empty
+Rule 37    assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON
+Rule 38    logicExpression -> exp doLogicExpression auxLogicExpression
+Rule 39    auxLogicExpression -> AND addOperator logicExpression
+Rule 40    auxLogicExpression -> OR addOperator logicExpression
+Rule 41    auxLogicExpression -> empty
+Rule 42    exp -> exp2 doCompExpression auxExp
+Rule 43    auxExp -> GREATER_THAN addOperator exp
+Rule 44    auxExp -> GREATER_EQUAL_THAN addOperator exp
+Rule 45    auxExp -> LESS_THAN addOperator exp
+Rule 46    auxExp -> LESS_EQUAL_THAN addOperator exp
+Rule 47    auxExp -> NOT_EQUALS addOperator exp
+Rule 48    auxExp -> EQUALS addOperator exp
+Rule 49    auxExp -> empty
+Rule 50    exp2 -> term doExpression exp2Aux
+Rule 51    exp2Aux -> PLUS addOperator exp2
+Rule 52    exp2Aux -> MINUS addOperator exp2
+Rule 53    exp2Aux -> empty
+Rule 54    term -> factor doTerm auxTerm
+Rule 55    auxTerm -> TIMES addOperator term
+Rule 56    auxTerm -> DIV addOperator term
+Rule 57    auxTerm -> MOD addOperator term
+Rule 58    auxTerm -> EXP addOperator term
+Rule 59    auxTerm -> empty
+Rule 60    factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+Rule 61    factor -> constants
+Rule 62    constants -> CTE_ID addOperand
+Rule 63    constants -> CTE_INT addConstantOperand
+Rule 64    constants -> CTE_FLOAT addConstantOperand
+Rule 65    constants -> CTE_STRING addConstantOperand
+Rule 66    constants -> TRUE addConstantBool
+Rule 67    constants -> FALSE addConstantBool
+Rule 68    if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF
+Rule 69    else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF
+Rule 70    else -> ELSE doElse funcBody
+Rule 71    else -> empty
+Rule 72    while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile
+Rule 73    for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody
+Rule 74    auxFor -> CTE_ID
+Rule 75    auxFor -> CTE_INT
+Rule 76    startup -> <empty>
+Rule 77    setMain -> <empty>
+Rule 78    endProgram -> <empty>
+Rule 79    endPrint -> <empty>
+Rule 80    saveFuncID -> <empty>
+Rule 81    addMemoryInfo -> <empty>
+Rule 82    endFunction -> <empty>
+Rule 83    doIF -> <empty>
+Rule 84    endIF -> <empty>
+Rule 85    doElse -> <empty>
+Rule 86    doWhile -> <empty>
+Rule 87    endWhile -> <empty>
+Rule 88    addCondStart -> <empty>
+Rule 89    saveVariableID -> <empty>
+Rule 90    setCurrentType -> <empty>
+Rule 91    addOperand -> <empty>
+Rule 92    addConstantOperand -> <empty>
+Rule 93    addConstantBool -> <empty>
+Rule 94    addOperator -> <empty>
+Rule 95    addParenthesis -> <empty>
+Rule 96    removeParenthesis -> <empty>
+Rule 97    doLogicExpression -> <empty>
+Rule 98    doCompExpression -> <empty>
+Rule 99    doExpression -> <empty>
+Rule 100   doTerm -> <empty>
+Rule 101   doAssign -> <empty>
+Rule 102   doWrite -> <empty>
+Rule 103   doWriteString -> <empty>
+Rule 104   empty -> <empty>
 
 Terminals, with rules where they appear
 
-AND                  : 
+AND                  : 39
 BINOMIAL             : 
-BOOL                 : 23
-COMMA                : 10 12 14
+BOOL                 : 25
+BTSProgam            : 1
+COMMA                : 11 13 15 35 73 73
 CTE_BOOL             : 
-CTE_FLOAT            : 
-CTE_ID               : 1 10 11 12 13 14 15 17
-CTE_INT              : 12 13 14 14 15 15
-DIV                  : 
-ELSE                 : 
-EQUAL                : 
-EXP                  : 
-FALSE                : 
-FLOAT                : 22
-FOR                  : 
-FUNC                 : 17
-GREATER_EQUAL_THAN   : 
-GREATER_THAN         : 
-IF                   : 
-INT                  : 21
-LEFT_BRACKET         : 12 13 14 14 15 15
-LEFT_CURLY_BRACKET   : 18
-LEFT_PAREN           : 1 17 20
-LESS_EQUAL_THAN      : 
-LESS_THAN            : 
+CTE_FLOAT            : 64
+CTE_ID               : 1 11 12 13 14 15 16 18 37 62 73 74
+CTE_INT              : 13 14 15 15 16 16 63 75
+CTE_STRING           : 34 65
+DIV                  : 56
+ELSE                 : 69 70
+EQUAL                : 37
+EQUALS               : 48
+EXP                  : 58
+FALSE                : 67
+FLOAT                : 24
+FOR                  : 73
+FUNC                 : 18
+GREATER_EQUAL_THAN   : 44
+GREATER_THAN         : 43
+IF                   : 68 69
+INT                  : 23
+LEFT_BRACKET         : 13 14 15 15 16 16
+LEFT_CURLY_BRACKET   : 19
+LEFT_PAREN           : 1 18 32 60 68 69 72 73
+LESS_EQUAL_THAN      : 46
+LESS_THAN            : 45
 MAIN                 : 1
 MEAN                 : 
 MEDIAN               : 
-MINUS                : 
-MOD                  : 
+MINUS                : 52
+MOD                  : 57
 MODE                 : 
-NOT_EQUAL            : 
-OR                   : 
+NOT_EQUALS           : 47
+OR                   : 40
 PLOT                 : 
-PLUS                 : 
+PLUS                 : 51
 POISSON              : 
-PRINT                : 
-PROGRAM              : 1
-READ_INPUT           : 20
+PRINT                : 32
+READ_INPUT           : 
 RETURN               : 
-RIGHT_BRACKET        : 12 13 14 14 15 15
-RIGHT_CURLY_BRACKET  : 18
-RIGHT_PAREN          : 1 17 20
-SEMI_COLON           : 1 11 13 15 20
+RIGHT_BRACKET        : 13 14 15 15 16 16
+RIGHT_CURLY_BRACKET  : 19
+RIGHT_PAREN          : 1 18 32 60 68 69 72 73
+SEMI_COLON           : 1 12 14 16 32 37
 STANDARD_DEVIATION   : 
-STRING               : 24
-TIMES                : 
-TRUE                 : 
-VAR                  : 6 7 8
+STRING               : 26
+TIMES                : 55
+TRUE                 : 66
+VAR                  : 7 8 9
 VARIANCE             : 
 VOID                 : 
-WHILE                : 
+WHILE                : 72
 error                : 
 
 Nonterminals, with rules where they appear
 
-auxFuncBody          : 18
-empty                : 3 5 9
+addCondStart         : 72
+addConstantBool      : 66 67
+addConstantOperand   : 63 64 65
+addMemoryInfo        : 1 18
+addOperand           : 37 62
+addOperator          : 37 39 40 43 44 45 46 47 48 51 52 55 56 57 58
+addParenthesis       : 60
+assignment           : 27
+auxExp               : 42
+auxFor               : 73 73
+auxFuncBody          : 19 20 21
+auxLogicExpression   : 38
+auxTerm              : 54
+auxVars              : 6 12 14 16
+auxWritting          : 32 35
+constants            : 61
+doAssign             : 37
+doCompExpression     : 42
+doElse               : 69 70
+doExpression         : 50
+doIF                 : 68 69
+doLogicExpression    : 38
+doTerm               : 54
+doWhile              : 72
+doWrite              : 33
+doWriteString        : 34
+else                 : 68
+empty                : 3 5 10 22 36 41 49 53 59 71
+endFunction          : 1 18
+endIF                : 68 69
 endPrint             : 1
-funcBody             : 1 17
+endProgram           : 1
+endWhile             : 72
+exp                  : 38 43 44 45 46 47 48
+exp2                 : 42 51 52
+exp2Aux              : 50
+factor               : 54
+for                  : 31
+funcBody             : 1 18 68 69 70 72 73
 funcs                : 4
-funcs_aux            : 16
-globalFunctions      : 1 16
+funcs_aux            : 17
+globalFunctions      : 1 17
 globalVariables      : 1
+if                   : 29
+logicExpression      : 33 37 39 40 60 68 69 72
+multipleWrite        : 33 34
 program_main         : 0
-read                 : 
-saveFuncID           : 1 17
-saveVariableID       : 10 11 12 13 14 15
-setCurrentType       : 21 22 23 24
+removeParenthesis    : 60
+saveFuncID           : 1 18
+saveVariableID       : 11 12 13 14 15 16
+setCurrentType       : 23 24 25 26
+setMain              : 1
 startup              : 1
-type                 : 6 7 8 17
-vars                 : 2 11 13 15 19
-vars_type            : 6 10
-vars_type_array      : 7 12
-vars_type_matrix     : 8 14
+statements           : 20 21
+term                 : 50 55 56 57 58
+type                 : 7 8 9 18
+vars                 : 2 20
+vars_type_array      : 8 13
+vars_type_matrix     : 9 15
+vars_type_single     : 7 11
+while                : 30
+writting             : 28
 
 Parsing method: LALR
 
 state 0
 
     (0) S' -> . program_main
-    (1) program_main -> . PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
+    (1) program_main -> . BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
 
-    PROGRAM         shift and go to state 2
+    BTSProgam       shift and go to state 2
 
     program_main                   shift and go to state 1
 
@@ -167,62 +265,64 @@ state 1
 
 state 2
 
-    (1) program_main -> PROGRAM . CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
+    (1) program_main -> BTSProgam . CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
 
     CTE_ID          shift and go to state 3
 
 
 state 3
 
-    (1) program_main -> PROGRAM CTE_ID . startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
-    (25) startup -> .
+    (1) program_main -> BTSProgam CTE_ID . startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
+    (76) startup -> .
 
-    SEMI_COLON      reduce using rule 25 (startup -> .)
+    SEMI_COLON      reduce using rule 76 (startup -> .)
 
     startup                        shift and go to state 4
 
 state 4
 
-    (1) program_main -> PROGRAM CTE_ID startup . SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
+    (1) program_main -> BTSProgam CTE_ID startup . SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
 
     SEMI_COLON      shift and go to state 5
 
 
 state 5
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON . globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON . globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
     (2) globalVariables -> . vars
     (3) globalVariables -> . empty
-    (6) vars -> . VAR type vars_type
-    (7) vars -> . VAR type vars_type_array
-    (8) vars -> . VAR type vars_type_matrix
-    (9) vars -> . empty
-    (30) empty -> .
+    (6) vars -> . auxVars
+    (104) empty -> .
+    (7) auxVars -> . VAR type vars_type_single
+    (8) auxVars -> . VAR type vars_type_array
+    (9) auxVars -> . VAR type vars_type_matrix
+    (10) auxVars -> . empty
 
-    VAR             shift and go to state 9
-    FUNC            reduce using rule 30 (empty -> .)
-    MAIN            reduce using rule 30 (empty -> .)
+    FUNC            reduce using rule 104 (empty -> .)
+    MAIN            reduce using rule 104 (empty -> .)
+    VAR             shift and go to state 10
 
     globalVariables                shift and go to state 6
     vars                           shift and go to state 7
     empty                          shift and go to state 8
+    auxVars                        shift and go to state 9
 
 state 6
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables . globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables . globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
     (4) globalFunctions -> . funcs
     (5) globalFunctions -> . empty
-    (16) funcs -> . funcs_aux globalFunctions
-    (30) empty -> .
-    (17) funcs_aux -> . FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
+    (17) funcs -> . funcs_aux globalFunctions
+    (104) empty -> .
+    (18) funcs_aux -> . FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction
 
-    MAIN            reduce using rule 30 (empty -> .)
-    FUNC            shift and go to state 14
+    MAIN            reduce using rule 104 (empty -> .)
+    FUNC            shift and go to state 15
 
-    globalFunctions                shift and go to state 10
-    funcs                          shift and go to state 11
-    empty                          shift and go to state 12
-    funcs_aux                      shift and go to state 13
+    globalFunctions                shift and go to state 11
+    funcs                          shift and go to state 12
+    empty                          shift and go to state 13
+    funcs_aux                      shift and go to state 14
 
 state 7
 
@@ -235,675 +335,3312 @@ state 7
 state 8
 
     (3) globalVariables -> empty .
-    (9) vars -> empty .
+    (10) auxVars -> empty .
 
   ! reduce/reduce conflict for FUNC resolved using rule 3 (globalVariables -> empty .)
   ! reduce/reduce conflict for MAIN resolved using rule 3 (globalVariables -> empty .)
     FUNC            reduce using rule 3 (globalVariables -> empty .)
     MAIN            reduce using rule 3 (globalVariables -> empty .)
 
-  ! FUNC            [ reduce using rule 9 (vars -> empty .) ]
-  ! MAIN            [ reduce using rule 9 (vars -> empty .) ]
+  ! FUNC            [ reduce using rule 10 (auxVars -> empty .) ]
+  ! MAIN            [ reduce using rule 10 (auxVars -> empty .) ]
 
 
 state 9
 
-    (6) vars -> VAR . type vars_type
-    (7) vars -> VAR . type vars_type_array
-    (8) vars -> VAR . type vars_type_matrix
-    (21) type -> . INT setCurrentType
-    (22) type -> . FLOAT setCurrentType
-    (23) type -> . BOOL setCurrentType
-    (24) type -> . STRING setCurrentType
+    (6) vars -> auxVars .
 
-    INT             shift and go to state 16
-    FLOAT           shift and go to state 17
-    BOOL            shift and go to state 18
-    STRING          shift and go to state 19
+    FUNC            reduce using rule 6 (vars -> auxVars .)
+    MAIN            reduce using rule 6 (vars -> auxVars .)
+    CTE_ID          reduce using rule 6 (vars -> auxVars .)
+    PRINT           reduce using rule 6 (vars -> auxVars .)
+    IF              reduce using rule 6 (vars -> auxVars .)
+    WHILE           reduce using rule 6 (vars -> auxVars .)
+    FOR             reduce using rule 6 (vars -> auxVars .)
 
-    type                           shift and go to state 15
 
 state 10
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions . MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
+    (7) auxVars -> VAR . type vars_type_single
+    (8) auxVars -> VAR . type vars_type_array
+    (9) auxVars -> VAR . type vars_type_matrix
+    (23) type -> . INT setCurrentType
+    (24) type -> . FLOAT setCurrentType
+    (25) type -> . BOOL setCurrentType
+    (26) type -> . STRING setCurrentType
 
-    MAIN            shift and go to state 20
+    INT             shift and go to state 17
+    FLOAT           shift and go to state 18
+    BOOL            shift and go to state 19
+    STRING          shift and go to state 20
 
+    type                           shift and go to state 16
 
 state 11
+
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions . MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
+
+    MAIN            shift and go to state 21
+
+
+state 12
 
     (4) globalFunctions -> funcs .
 
     MAIN            reduce using rule 4 (globalFunctions -> funcs .)
 
 
-state 12
+state 13
 
     (5) globalFunctions -> empty .
 
     MAIN            reduce using rule 5 (globalFunctions -> empty .)
 
 
-state 13
-
-    (16) funcs -> funcs_aux . globalFunctions
-    (4) globalFunctions -> . funcs
-    (5) globalFunctions -> . empty
-    (16) funcs -> . funcs_aux globalFunctions
-    (30) empty -> .
-    (17) funcs_aux -> . FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
-
-    MAIN            reduce using rule 30 (empty -> .)
-    FUNC            shift and go to state 14
-
-    funcs_aux                      shift and go to state 13
-    globalFunctions                shift and go to state 21
-    funcs                          shift and go to state 11
-    empty                          shift and go to state 12
-
 state 14
 
-    (17) funcs_aux -> FUNC . type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
-    (21) type -> . INT setCurrentType
-    (22) type -> . FLOAT setCurrentType
-    (23) type -> . BOOL setCurrentType
-    (24) type -> . STRING setCurrentType
+    (17) funcs -> funcs_aux . globalFunctions
+    (4) globalFunctions -> . funcs
+    (5) globalFunctions -> . empty
+    (17) funcs -> . funcs_aux globalFunctions
+    (104) empty -> .
+    (18) funcs_aux -> . FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction
 
-    INT             shift and go to state 16
-    FLOAT           shift and go to state 17
-    BOOL            shift and go to state 18
-    STRING          shift and go to state 19
+    MAIN            reduce using rule 104 (empty -> .)
+    FUNC            shift and go to state 15
 
-    type                           shift and go to state 22
+    funcs_aux                      shift and go to state 14
+    globalFunctions                shift and go to state 22
+    funcs                          shift and go to state 12
+    empty                          shift and go to state 13
 
 state 15
 
-    (6) vars -> VAR type . vars_type
-    (7) vars -> VAR type . vars_type_array
-    (8) vars -> VAR type . vars_type_matrix
-    (10) vars_type -> . CTE_ID saveVariableID COMMA vars_type
-    (11) vars_type -> . CTE_ID saveVariableID SEMI_COLON vars
-    (12) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (14) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (18) funcs_aux -> FUNC . type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction
+    (23) type -> . INT setCurrentType
+    (24) type -> . FLOAT setCurrentType
+    (25) type -> . BOOL setCurrentType
+    (26) type -> . STRING setCurrentType
 
-    CTE_ID          shift and go to state 26
+    INT             shift and go to state 17
+    FLOAT           shift and go to state 18
+    BOOL            shift and go to state 19
+    STRING          shift and go to state 20
 
-    vars_type                      shift and go to state 23
-    vars_type_array                shift and go to state 24
-    vars_type_matrix               shift and go to state 25
+    type                           shift and go to state 23
 
 state 16
 
-    (21) type -> INT . setCurrentType
-    (29) setCurrentType -> .
+    (7) auxVars -> VAR type . vars_type_single
+    (8) auxVars -> VAR type . vars_type_array
+    (9) auxVars -> VAR type . vars_type_matrix
+    (11) vars_type_single -> . CTE_ID saveVariableID COMMA vars_type_single
+    (12) vars_type_single -> . CTE_ID saveVariableID SEMI_COLON auxVars
+    (13) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+    (15) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
 
-    CTE_ID          reduce using rule 29 (setCurrentType -> .)
+    CTE_ID          shift and go to state 27
 
-    setCurrentType                 shift and go to state 27
+    vars_type_single               shift and go to state 24
+    vars_type_array                shift and go to state 25
+    vars_type_matrix               shift and go to state 26
 
 state 17
 
-    (22) type -> FLOAT . setCurrentType
-    (29) setCurrentType -> .
+    (23) type -> INT . setCurrentType
+    (90) setCurrentType -> .
 
-    CTE_ID          reduce using rule 29 (setCurrentType -> .)
+    CTE_ID          reduce using rule 90 (setCurrentType -> .)
 
     setCurrentType                 shift and go to state 28
 
 state 18
 
-    (23) type -> BOOL . setCurrentType
-    (29) setCurrentType -> .
+    (24) type -> FLOAT . setCurrentType
+    (90) setCurrentType -> .
 
-    CTE_ID          reduce using rule 29 (setCurrentType -> .)
+    CTE_ID          reduce using rule 90 (setCurrentType -> .)
 
     setCurrentType                 shift and go to state 29
 
 state 19
 
-    (24) type -> STRING . setCurrentType
-    (29) setCurrentType -> .
+    (25) type -> BOOL . setCurrentType
+    (90) setCurrentType -> .
 
-    CTE_ID          reduce using rule 29 (setCurrentType -> .)
+    CTE_ID          reduce using rule 90 (setCurrentType -> .)
 
     setCurrentType                 shift and go to state 30
 
 state 20
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN . saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint
-    (27) saveFuncID -> .
+    (26) type -> STRING . setCurrentType
+    (90) setCurrentType -> .
 
-    LEFT_PAREN      reduce using rule 27 (saveFuncID -> .)
+    CTE_ID          reduce using rule 90 (setCurrentType -> .)
 
-    saveFuncID                     shift and go to state 31
+    setCurrentType                 shift and go to state 31
 
 state 21
 
-    (16) funcs -> funcs_aux globalFunctions .
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN . saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
+    (80) saveFuncID -> .
 
-    MAIN            reduce using rule 16 (funcs -> funcs_aux globalFunctions .)
+    LEFT_PAREN      reduce using rule 80 (saveFuncID -> .)
 
+    saveFuncID                     shift and go to state 32
 
 state 22
 
-    (17) funcs_aux -> FUNC type . CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
+    (17) funcs -> funcs_aux globalFunctions .
 
-    CTE_ID          shift and go to state 32
+    MAIN            reduce using rule 17 (funcs -> funcs_aux globalFunctions .)
 
 
 state 23
 
-    (6) vars -> VAR type vars_type .
+    (18) funcs_aux -> FUNC type . CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction
 
-    FUNC            reduce using rule 6 (vars -> VAR type vars_type .)
-    MAIN            reduce using rule 6 (vars -> VAR type vars_type .)
-    RIGHT_CURLY_BRACKET reduce using rule 6 (vars -> VAR type vars_type .)
+    CTE_ID          shift and go to state 33
 
 
 state 24
 
-    (7) vars -> VAR type vars_type_array .
+    (7) auxVars -> VAR type vars_type_single .
 
-    FUNC            reduce using rule 7 (vars -> VAR type vars_type_array .)
-    MAIN            reduce using rule 7 (vars -> VAR type vars_type_array .)
-    RIGHT_CURLY_BRACKET reduce using rule 7 (vars -> VAR type vars_type_array .)
+    FUNC            reduce using rule 7 (auxVars -> VAR type vars_type_single .)
+    MAIN            reduce using rule 7 (auxVars -> VAR type vars_type_single .)
+    CTE_ID          reduce using rule 7 (auxVars -> VAR type vars_type_single .)
+    PRINT           reduce using rule 7 (auxVars -> VAR type vars_type_single .)
+    IF              reduce using rule 7 (auxVars -> VAR type vars_type_single .)
+    WHILE           reduce using rule 7 (auxVars -> VAR type vars_type_single .)
+    FOR             reduce using rule 7 (auxVars -> VAR type vars_type_single .)
 
 
 state 25
 
-    (8) vars -> VAR type vars_type_matrix .
+    (8) auxVars -> VAR type vars_type_array .
 
-    FUNC            reduce using rule 8 (vars -> VAR type vars_type_matrix .)
-    MAIN            reduce using rule 8 (vars -> VAR type vars_type_matrix .)
-    RIGHT_CURLY_BRACKET reduce using rule 8 (vars -> VAR type vars_type_matrix .)
+    FUNC            reduce using rule 8 (auxVars -> VAR type vars_type_array .)
+    MAIN            reduce using rule 8 (auxVars -> VAR type vars_type_array .)
+    CTE_ID          reduce using rule 8 (auxVars -> VAR type vars_type_array .)
+    PRINT           reduce using rule 8 (auxVars -> VAR type vars_type_array .)
+    IF              reduce using rule 8 (auxVars -> VAR type vars_type_array .)
+    WHILE           reduce using rule 8 (auxVars -> VAR type vars_type_array .)
+    FOR             reduce using rule 8 (auxVars -> VAR type vars_type_array .)
 
 
 state 26
 
-    (10) vars_type -> CTE_ID . saveVariableID COMMA vars_type
-    (11) vars_type -> CTE_ID . saveVariableID SEMI_COLON vars
-    (12) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (14) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (28) saveVariableID -> .
+    (9) auxVars -> VAR type vars_type_matrix .
 
-    COMMA           reduce using rule 28 (saveVariableID -> .)
-    SEMI_COLON      reduce using rule 28 (saveVariableID -> .)
-    LEFT_BRACKET    reduce using rule 28 (saveVariableID -> .)
+    FUNC            reduce using rule 9 (auxVars -> VAR type vars_type_matrix .)
+    MAIN            reduce using rule 9 (auxVars -> VAR type vars_type_matrix .)
+    CTE_ID          reduce using rule 9 (auxVars -> VAR type vars_type_matrix .)
+    PRINT           reduce using rule 9 (auxVars -> VAR type vars_type_matrix .)
+    IF              reduce using rule 9 (auxVars -> VAR type vars_type_matrix .)
+    WHILE           reduce using rule 9 (auxVars -> VAR type vars_type_matrix .)
+    FOR             reduce using rule 9 (auxVars -> VAR type vars_type_matrix .)
 
-    saveVariableID                 shift and go to state 33
 
 state 27
 
-    (21) type -> INT setCurrentType .
+    (11) vars_type_single -> CTE_ID . saveVariableID COMMA vars_type_single
+    (12) vars_type_single -> CTE_ID . saveVariableID SEMI_COLON auxVars
+    (13) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+    (15) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+    (89) saveVariableID -> .
 
-    CTE_ID          reduce using rule 21 (type -> INT setCurrentType .)
+    COMMA           reduce using rule 89 (saveVariableID -> .)
+    SEMI_COLON      reduce using rule 89 (saveVariableID -> .)
+    LEFT_BRACKET    reduce using rule 89 (saveVariableID -> .)
 
+    saveVariableID                 shift and go to state 34
 
 state 28
 
-    (22) type -> FLOAT setCurrentType .
+    (23) type -> INT setCurrentType .
 
-    CTE_ID          reduce using rule 22 (type -> FLOAT setCurrentType .)
+    CTE_ID          reduce using rule 23 (type -> INT setCurrentType .)
 
 
 state 29
 
-    (23) type -> BOOL setCurrentType .
+    (24) type -> FLOAT setCurrentType .
 
-    CTE_ID          reduce using rule 23 (type -> BOOL setCurrentType .)
+    CTE_ID          reduce using rule 24 (type -> FLOAT setCurrentType .)
 
 
 state 30
 
-    (24) type -> STRING setCurrentType .
+    (25) type -> BOOL setCurrentType .
 
-    CTE_ID          reduce using rule 24 (type -> STRING setCurrentType .)
+    CTE_ID          reduce using rule 25 (type -> BOOL setCurrentType .)
 
 
 state 31
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID . LEFT_PAREN RIGHT_PAREN funcBody endPrint
+    (26) type -> STRING setCurrentType .
 
-    LEFT_PAREN      shift and go to state 34
+    CTE_ID          reduce using rule 26 (type -> STRING setCurrentType .)
 
 
 state 32
 
-    (17) funcs_aux -> FUNC type CTE_ID . saveFuncID LEFT_PAREN RIGHT_PAREN funcBody
-    (27) saveFuncID -> .
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID . addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
+    (81) addMemoryInfo -> .
 
-    LEFT_PAREN      reduce using rule 27 (saveFuncID -> .)
+    LEFT_PAREN      reduce using rule 81 (addMemoryInfo -> .)
 
-    saveFuncID                     shift and go to state 35
+    addMemoryInfo                  shift and go to state 35
 
 state 33
 
-    (10) vars_type -> CTE_ID saveVariableID . COMMA vars_type
-    (11) vars_type -> CTE_ID saveVariableID . SEMI_COLON vars
-    (12) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (14) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (18) funcs_aux -> FUNC type CTE_ID . saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction
+    (80) saveFuncID -> .
 
-    COMMA           shift and go to state 36
-    SEMI_COLON      shift and go to state 37
-    LEFT_BRACKET    shift and go to state 38
+    LEFT_PAREN      reduce using rule 80 (saveFuncID -> .)
 
+    saveFuncID                     shift and go to state 36
 
 state 34
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN . RIGHT_PAREN funcBody endPrint
+    (11) vars_type_single -> CTE_ID saveVariableID . COMMA vars_type_single
+    (12) vars_type_single -> CTE_ID saveVariableID . SEMI_COLON auxVars
+    (13) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+    (15) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
 
-    RIGHT_PAREN     shift and go to state 39
+    COMMA           shift and go to state 37
+    SEMI_COLON      shift and go to state 38
+    LEFT_BRACKET    shift and go to state 39
 
 
 state 35
 
-    (17) funcs_aux -> FUNC type CTE_ID saveFuncID . LEFT_PAREN RIGHT_PAREN funcBody
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo . LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
 
     LEFT_PAREN      shift and go to state 40
 
 
 state 36
 
-    (10) vars_type -> CTE_ID saveVariableID COMMA . vars_type
-    (10) vars_type -> . CTE_ID saveVariableID COMMA vars_type
-    (11) vars_type -> . CTE_ID saveVariableID SEMI_COLON vars
+    (18) funcs_aux -> FUNC type CTE_ID saveFuncID . LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction
 
-    CTE_ID          shift and go to state 41
+    LEFT_PAREN      shift and go to state 41
 
-    vars_type                      shift and go to state 42
 
 state 37
 
-    (11) vars_type -> CTE_ID saveVariableID SEMI_COLON . vars
-    (6) vars -> . VAR type vars_type
-    (7) vars -> . VAR type vars_type_array
-    (8) vars -> . VAR type vars_type_matrix
-    (9) vars -> . empty
-    (30) empty -> .
+    (11) vars_type_single -> CTE_ID saveVariableID COMMA . vars_type_single
+    (11) vars_type_single -> . CTE_ID saveVariableID COMMA vars_type_single
+    (12) vars_type_single -> . CTE_ID saveVariableID SEMI_COLON auxVars
 
-    VAR             shift and go to state 9
-    FUNC            reduce using rule 30 (empty -> .)
-    MAIN            reduce using rule 30 (empty -> .)
-    RIGHT_CURLY_BRACKET reduce using rule 30 (empty -> .)
+    CTE_ID          shift and go to state 42
 
-    vars                           shift and go to state 43
-    empty                          shift and go to state 44
+    vars_type_single               shift and go to state 43
 
 state 38
 
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (12) vars_type_single -> CTE_ID saveVariableID SEMI_COLON . auxVars
+    (7) auxVars -> . VAR type vars_type_single
+    (8) auxVars -> . VAR type vars_type_array
+    (9) auxVars -> . VAR type vars_type_matrix
+    (10) auxVars -> . empty
+    (104) empty -> .
 
-    CTE_INT         shift and go to state 45
+    VAR             shift and go to state 10
+    FUNC            reduce using rule 104 (empty -> .)
+    MAIN            reduce using rule 104 (empty -> .)
+    CTE_ID          reduce using rule 104 (empty -> .)
+    PRINT           reduce using rule 104 (empty -> .)
+    IF              reduce using rule 104 (empty -> .)
+    WHILE           reduce using rule 104 (empty -> .)
+    FOR             reduce using rule 104 (empty -> .)
 
+    auxVars                        shift and go to state 44
+    empty                          shift and go to state 45
 
 state 39
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN . funcBody endPrint
-    (18) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
 
-    LEFT_CURLY_BRACKET shift and go to state 47
+    CTE_INT         shift and go to state 46
 
-    funcBody                       shift and go to state 46
 
 state 40
 
-    (17) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN . RIGHT_PAREN funcBody
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN . RIGHT_PAREN setMain funcBody endFunction endProgram endPrint
 
-    RIGHT_PAREN     shift and go to state 48
+    RIGHT_PAREN     shift and go to state 47
 
 
 state 41
 
-    (10) vars_type -> CTE_ID . saveVariableID COMMA vars_type
-    (11) vars_type -> CTE_ID . saveVariableID SEMI_COLON vars
-    (28) saveVariableID -> .
+    (18) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN . RIGHT_PAREN funcBody addMemoryInfo endFunction
 
-    COMMA           reduce using rule 28 (saveVariableID -> .)
-    SEMI_COLON      reduce using rule 28 (saveVariableID -> .)
+    RIGHT_PAREN     shift and go to state 48
 
-    saveVariableID                 shift and go to state 49
 
 state 42
 
-    (10) vars_type -> CTE_ID saveVariableID COMMA vars_type .
+    (11) vars_type_single -> CTE_ID . saveVariableID COMMA vars_type_single
+    (12) vars_type_single -> CTE_ID . saveVariableID SEMI_COLON auxVars
+    (89) saveVariableID -> .
 
-    FUNC            reduce using rule 10 (vars_type -> CTE_ID saveVariableID COMMA vars_type .)
-    MAIN            reduce using rule 10 (vars_type -> CTE_ID saveVariableID COMMA vars_type .)
-    RIGHT_CURLY_BRACKET reduce using rule 10 (vars_type -> CTE_ID saveVariableID COMMA vars_type .)
+    COMMA           reduce using rule 89 (saveVariableID -> .)
+    SEMI_COLON      reduce using rule 89 (saveVariableID -> .)
 
+    saveVariableID                 shift and go to state 49
 
 state 43
 
-    (11) vars_type -> CTE_ID saveVariableID SEMI_COLON vars .
+    (11) vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single .
 
-    FUNC            reduce using rule 11 (vars_type -> CTE_ID saveVariableID SEMI_COLON vars .)
-    MAIN            reduce using rule 11 (vars_type -> CTE_ID saveVariableID SEMI_COLON vars .)
-    RIGHT_CURLY_BRACKET reduce using rule 11 (vars_type -> CTE_ID saveVariableID SEMI_COLON vars .)
+    FUNC            reduce using rule 11 (vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single .)
+    MAIN            reduce using rule 11 (vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single .)
+    CTE_ID          reduce using rule 11 (vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single .)
+    PRINT           reduce using rule 11 (vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single .)
+    IF              reduce using rule 11 (vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single .)
+    WHILE           reduce using rule 11 (vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single .)
+    FOR             reduce using rule 11 (vars_type_single -> CTE_ID saveVariableID COMMA vars_type_single .)
 
 
 state 44
 
-    (9) vars -> empty .
+    (12) vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars .
 
-    FUNC            reduce using rule 9 (vars -> empty .)
-    MAIN            reduce using rule 9 (vars -> empty .)
-    RIGHT_CURLY_BRACKET reduce using rule 9 (vars -> empty .)
+    FUNC            reduce using rule 12 (vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars .)
+    MAIN            reduce using rule 12 (vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars .)
+    CTE_ID          reduce using rule 12 (vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars .)
+    PRINT           reduce using rule 12 (vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars .)
+    IF              reduce using rule 12 (vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars .)
+    WHILE           reduce using rule 12 (vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars .)
+    FOR             reduce using rule 12 (vars_type_single -> CTE_ID saveVariableID SEMI_COLON auxVars .)
 
 
 state 45
 
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET SEMI_COLON vars
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (10) auxVars -> empty .
 
-    RIGHT_BRACKET   shift and go to state 50
+    FUNC            reduce using rule 10 (auxVars -> empty .)
+    MAIN            reduce using rule 10 (auxVars -> empty .)
+    CTE_ID          reduce using rule 10 (auxVars -> empty .)
+    PRINT           reduce using rule 10 (auxVars -> empty .)
+    IF              reduce using rule 10 (auxVars -> empty .)
+    WHILE           reduce using rule 10 (auxVars -> empty .)
+    FOR             reduce using rule 10 (auxVars -> empty .)
 
 
 state 46
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody . endPrint
-    (26) endPrint -> .
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET SEMI_COLON auxVars
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
 
-    $end            reduce using rule 26 (endPrint -> .)
+    RIGHT_BRACKET   shift and go to state 50
 
-    endPrint                       shift and go to state 51
 
 state 47
 
-    (18) funcBody -> LEFT_CURLY_BRACKET . auxFuncBody RIGHT_CURLY_BRACKET
-    (19) auxFuncBody -> . vars
-    (6) vars -> . VAR type vars_type
-    (7) vars -> . VAR type vars_type_array
-    (8) vars -> . VAR type vars_type_matrix
-    (9) vars -> . empty
-    (30) empty -> .
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN . setMain funcBody endFunction endProgram endPrint
+    (77) setMain -> .
 
-    VAR             shift and go to state 9
-    RIGHT_CURLY_BRACKET reduce using rule 30 (empty -> .)
+    LEFT_CURLY_BRACKET reduce using rule 77 (setMain -> .)
 
-    auxFuncBody                    shift and go to state 52
-    vars                           shift and go to state 53
-    empty                          shift and go to state 44
+    setMain                        shift and go to state 51
 
 state 48
 
-    (17) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN . funcBody
-    (18) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+    (18) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN . funcBody addMemoryInfo endFunction
+    (19) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
 
-    LEFT_CURLY_BRACKET shift and go to state 47
+    LEFT_CURLY_BRACKET shift and go to state 53
 
-    funcBody                       shift and go to state 54
+    funcBody                       shift and go to state 52
 
 state 49
 
-    (10) vars_type -> CTE_ID saveVariableID . COMMA vars_type
-    (11) vars_type -> CTE_ID saveVariableID . SEMI_COLON vars
+    (11) vars_type_single -> CTE_ID saveVariableID . COMMA vars_type_single
+    (12) vars_type_single -> CTE_ID saveVariableID . SEMI_COLON auxVars
 
-    COMMA           shift and go to state 36
-    SEMI_COLON      shift and go to state 37
+    COMMA           shift and go to state 37
+    SEMI_COLON      shift and go to state 38
 
 
 state 50
 
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON vars
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON auxVars
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
 
-    COMMA           shift and go to state 56
-    SEMI_COLON      shift and go to state 57
-    LEFT_BRACKET    shift and go to state 55
+    COMMA           shift and go to state 55
+    SEMI_COLON      shift and go to state 56
+    LEFT_BRACKET    shift and go to state 54
 
 
 state 51
 
-    (1) program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint .
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain . funcBody endFunction endProgram endPrint
+    (19) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
 
-    $end            reduce using rule 1 (program_main -> PROGRAM CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID LEFT_PAREN RIGHT_PAREN funcBody endPrint .)
+    LEFT_CURLY_BRACKET shift and go to state 53
 
+    funcBody                       shift and go to state 57
 
 state 52
 
-    (18) funcBody -> LEFT_CURLY_BRACKET auxFuncBody . RIGHT_CURLY_BRACKET
+    (18) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody . addMemoryInfo endFunction
+    (81) addMemoryInfo -> .
 
-    RIGHT_CURLY_BRACKET shift and go to state 58
+    FUNC            reduce using rule 81 (addMemoryInfo -> .)
+    MAIN            reduce using rule 81 (addMemoryInfo -> .)
 
+    addMemoryInfo                  shift and go to state 58
 
 state 53
 
-    (19) auxFuncBody -> vars .
+    (19) funcBody -> LEFT_CURLY_BRACKET . auxFuncBody RIGHT_CURLY_BRACKET
+    (20) auxFuncBody -> . vars statements auxFuncBody
+    (21) auxFuncBody -> . statements auxFuncBody
+    (22) auxFuncBody -> . empty
+    (6) vars -> . auxVars
+    (27) statements -> . assignment
+    (28) statements -> . writting
+    (29) statements -> . if
+    (30) statements -> . while
+    (31) statements -> . for
+    (104) empty -> .
+    (7) auxVars -> . VAR type vars_type_single
+    (8) auxVars -> . VAR type vars_type_array
+    (9) auxVars -> . VAR type vars_type_matrix
+    (10) auxVars -> . empty
+    (37) assignment -> . CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON
+    (32) writting -> . PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON
+    (68) if -> . IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF
+    (72) while -> . WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile
+    (73) for -> . FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody
 
-    RIGHT_CURLY_BRACKET reduce using rule 19 (auxFuncBody -> vars .)
+  ! shift/reduce conflict for CTE_ID resolved as shift
+  ! shift/reduce conflict for PRINT resolved as shift
+  ! shift/reduce conflict for IF resolved as shift
+  ! shift/reduce conflict for WHILE resolved as shift
+  ! shift/reduce conflict for FOR resolved as shift
+    RIGHT_CURLY_BRACKET reduce using rule 104 (empty -> .)
+    VAR             shift and go to state 10
+    CTE_ID          shift and go to state 68
+    PRINT           shift and go to state 69
+    IF              shift and go to state 70
+    WHILE           shift and go to state 71
+    FOR             shift and go to state 72
 
+  ! CTE_ID          [ reduce using rule 104 (empty -> .) ]
+  ! PRINT           [ reduce using rule 104 (empty -> .) ]
+  ! IF              [ reduce using rule 104 (empty -> .) ]
+  ! WHILE           [ reduce using rule 104 (empty -> .) ]
+  ! FOR             [ reduce using rule 104 (empty -> .) ]
+
+    auxFuncBody                    shift and go to state 59
+    vars                           shift and go to state 60
+    statements                     shift and go to state 61
+    empty                          shift and go to state 62
+    auxVars                        shift and go to state 9
+    assignment                     shift and go to state 63
+    writting                       shift and go to state 64
+    if                             shift and go to state 65
+    while                          shift and go to state 66
+    for                            shift and go to state 67
 
 state 54
 
-    (17) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody .
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET . CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET . CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
 
-    FUNC            reduce using rule 17 (funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody .)
-    MAIN            reduce using rule 17 (funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody .)
+    CTE_INT         shift and go to state 73
 
 
 state 55
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET . CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET . CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA . vars_type_array
+    (13) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
 
-    CTE_INT         shift and go to state 59
+    CTE_ID          shift and go to state 74
 
+    vars_type_array                shift and go to state 75
 
 state 56
 
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA . vars_type_array
-    (12) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (14) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON . auxVars
+    (7) auxVars -> . VAR type vars_type_single
+    (8) auxVars -> . VAR type vars_type_array
+    (9) auxVars -> . VAR type vars_type_matrix
+    (10) auxVars -> . empty
+    (104) empty -> .
 
-    CTE_ID          shift and go to state 60
+    VAR             shift and go to state 10
+    FUNC            reduce using rule 104 (empty -> .)
+    MAIN            reduce using rule 104 (empty -> .)
+    CTE_ID          reduce using rule 104 (empty -> .)
+    PRINT           reduce using rule 104 (empty -> .)
+    IF              reduce using rule 104 (empty -> .)
+    WHILE           reduce using rule 104 (empty -> .)
+    FOR             reduce using rule 104 (empty -> .)
 
-    vars_type_array                shift and go to state 61
+    auxVars                        shift and go to state 76
+    empty                          shift and go to state 45
 
 state 57
 
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON . vars
-    (6) vars -> . VAR type vars_type
-    (7) vars -> . VAR type vars_type_array
-    (8) vars -> . VAR type vars_type_matrix
-    (9) vars -> . empty
-    (30) empty -> .
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody . endFunction endProgram endPrint
+    (82) endFunction -> .
 
-    VAR             shift and go to state 9
-    FUNC            reduce using rule 30 (empty -> .)
-    MAIN            reduce using rule 30 (empty -> .)
-    RIGHT_CURLY_BRACKET reduce using rule 30 (empty -> .)
+    $end            reduce using rule 82 (endFunction -> .)
 
-    vars                           shift and go to state 62
-    empty                          shift and go to state 44
+    endFunction                    shift and go to state 77
 
 state 58
 
-    (18) funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .
+    (18) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo . endFunction
+    (82) endFunction -> .
 
-    $end            reduce using rule 18 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
-    FUNC            reduce using rule 18 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
-    MAIN            reduce using rule 18 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    FUNC            reduce using rule 82 (endFunction -> .)
+    MAIN            reduce using rule 82 (endFunction -> .)
 
+    endFunction                    shift and go to state 78
 
 state 59
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT . RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT . RIGHT_BRACKET SEMI_COLON vars
+    (19) funcBody -> LEFT_CURLY_BRACKET auxFuncBody . RIGHT_CURLY_BRACKET
 
-    RIGHT_BRACKET   shift and go to state 63
+    RIGHT_CURLY_BRACKET shift and go to state 79
 
 
 state 60
 
-    (12) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (28) saveVariableID -> .
+    (20) auxFuncBody -> vars . statements auxFuncBody
+    (27) statements -> . assignment
+    (28) statements -> . writting
+    (29) statements -> . if
+    (30) statements -> . while
+    (31) statements -> . for
+    (37) assignment -> . CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON
+    (32) writting -> . PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON
+    (68) if -> . IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF
+    (72) while -> . WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile
+    (73) for -> . FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody
 
-    LEFT_BRACKET    reduce using rule 28 (saveVariableID -> .)
+    CTE_ID          shift and go to state 68
+    PRINT           shift and go to state 69
+    IF              shift and go to state 70
+    WHILE           shift and go to state 71
+    FOR             shift and go to state 72
 
-    saveVariableID                 shift and go to state 64
+    statements                     shift and go to state 80
+    assignment                     shift and go to state 63
+    writting                       shift and go to state 64
+    if                             shift and go to state 65
+    while                          shift and go to state 66
+    for                            shift and go to state 67
 
 state 61
 
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .
+    (21) auxFuncBody -> statements . auxFuncBody
+    (20) auxFuncBody -> . vars statements auxFuncBody
+    (21) auxFuncBody -> . statements auxFuncBody
+    (22) auxFuncBody -> . empty
+    (6) vars -> . auxVars
+    (27) statements -> . assignment
+    (28) statements -> . writting
+    (29) statements -> . if
+    (30) statements -> . while
+    (31) statements -> . for
+    (104) empty -> .
+    (7) auxVars -> . VAR type vars_type_single
+    (8) auxVars -> . VAR type vars_type_array
+    (9) auxVars -> . VAR type vars_type_matrix
+    (10) auxVars -> . empty
+    (37) assignment -> . CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON
+    (32) writting -> . PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON
+    (68) if -> . IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF
+    (72) while -> . WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile
+    (73) for -> . FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody
 
-    FUNC            reduce using rule 12 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
-    MAIN            reduce using rule 12 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
-    RIGHT_CURLY_BRACKET reduce using rule 12 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
+  ! shift/reduce conflict for CTE_ID resolved as shift
+  ! shift/reduce conflict for PRINT resolved as shift
+  ! shift/reduce conflict for IF resolved as shift
+  ! shift/reduce conflict for WHILE resolved as shift
+  ! shift/reduce conflict for FOR resolved as shift
+    RIGHT_CURLY_BRACKET reduce using rule 104 (empty -> .)
+    VAR             shift and go to state 10
+    CTE_ID          shift and go to state 68
+    PRINT           shift and go to state 69
+    IF              shift and go to state 70
+    WHILE           shift and go to state 71
+    FOR             shift and go to state 72
 
+  ! CTE_ID          [ reduce using rule 104 (empty -> .) ]
+  ! PRINT           [ reduce using rule 104 (empty -> .) ]
+  ! IF              [ reduce using rule 104 (empty -> .) ]
+  ! WHILE           [ reduce using rule 104 (empty -> .) ]
+  ! FOR             [ reduce using rule 104 (empty -> .) ]
+
+    statements                     shift and go to state 61
+    auxFuncBody                    shift and go to state 81
+    vars                           shift and go to state 60
+    empty                          shift and go to state 62
+    auxVars                        shift and go to state 9
+    assignment                     shift and go to state 63
+    writting                       shift and go to state 64
+    if                             shift and go to state 65
+    while                          shift and go to state 66
+    for                            shift and go to state 67
 
 state 62
 
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .
+    (22) auxFuncBody -> empty .
+    (10) auxVars -> empty .
 
-    FUNC            reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
-    MAIN            reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
-    RIGHT_CURLY_BRACKET reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
+    RIGHT_CURLY_BRACKET reduce using rule 22 (auxFuncBody -> empty .)
+    CTE_ID          reduce using rule 10 (auxVars -> empty .)
+    PRINT           reduce using rule 10 (auxVars -> empty .)
+    IF              reduce using rule 10 (auxVars -> empty .)
+    WHILE           reduce using rule 10 (auxVars -> empty .)
+    FOR             reduce using rule 10 (auxVars -> empty .)
 
 
 state 63
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON vars
+    (27) statements -> assignment .
 
-    COMMA           shift and go to state 65
-    SEMI_COLON      shift and go to state 66
+    VAR             reduce using rule 27 (statements -> assignment .)
+    CTE_ID          reduce using rule 27 (statements -> assignment .)
+    PRINT           reduce using rule 27 (statements -> assignment .)
+    IF              reduce using rule 27 (statements -> assignment .)
+    WHILE           reduce using rule 27 (statements -> assignment .)
+    FOR             reduce using rule 27 (statements -> assignment .)
+    RIGHT_CURLY_BRACKET reduce using rule 27 (statements -> assignment .)
 
 
 state 64
 
-    (12) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (28) statements -> writting .
 
-    LEFT_BRACKET    shift and go to state 67
+    VAR             reduce using rule 28 (statements -> writting .)
+    CTE_ID          reduce using rule 28 (statements -> writting .)
+    PRINT           reduce using rule 28 (statements -> writting .)
+    IF              reduce using rule 28 (statements -> writting .)
+    WHILE           reduce using rule 28 (statements -> writting .)
+    FOR             reduce using rule 28 (statements -> writting .)
+    RIGHT_CURLY_BRACKET reduce using rule 28 (statements -> writting .)
 
 
 state 65
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA . vars_type_matrix
-    (14) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (29) statements -> if .
 
-    CTE_ID          shift and go to state 68
+    VAR             reduce using rule 29 (statements -> if .)
+    CTE_ID          reduce using rule 29 (statements -> if .)
+    PRINT           reduce using rule 29 (statements -> if .)
+    IF              reduce using rule 29 (statements -> if .)
+    WHILE           reduce using rule 29 (statements -> if .)
+    FOR             reduce using rule 29 (statements -> if .)
+    RIGHT_CURLY_BRACKET reduce using rule 29 (statements -> if .)
 
-    vars_type_matrix               shift and go to state 69
 
 state 66
 
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON . vars
-    (6) vars -> . VAR type vars_type
-    (7) vars -> . VAR type vars_type_array
-    (8) vars -> . VAR type vars_type_matrix
-    (9) vars -> . empty
-    (30) empty -> .
+    (30) statements -> while .
 
-    VAR             shift and go to state 9
-    FUNC            reduce using rule 30 (empty -> .)
-    MAIN            reduce using rule 30 (empty -> .)
-    RIGHT_CURLY_BRACKET reduce using rule 30 (empty -> .)
+    VAR             reduce using rule 30 (statements -> while .)
+    CTE_ID          reduce using rule 30 (statements -> while .)
+    PRINT           reduce using rule 30 (statements -> while .)
+    IF              reduce using rule 30 (statements -> while .)
+    WHILE           reduce using rule 30 (statements -> while .)
+    FOR             reduce using rule 30 (statements -> while .)
+    RIGHT_CURLY_BRACKET reduce using rule 30 (statements -> while .)
 
-    vars                           shift and go to state 70
-    empty                          shift and go to state 44
 
 state 67
 
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (31) statements -> for .
 
-    CTE_INT         shift and go to state 71
+    VAR             reduce using rule 31 (statements -> for .)
+    CTE_ID          reduce using rule 31 (statements -> for .)
+    PRINT           reduce using rule 31 (statements -> for .)
+    IF              reduce using rule 31 (statements -> for .)
+    WHILE           reduce using rule 31 (statements -> for .)
+    FOR             reduce using rule 31 (statements -> for .)
+    RIGHT_CURLY_BRACKET reduce using rule 31 (statements -> for .)
 
 
 state 68
 
-    (14) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
-    (28) saveVariableID -> .
+    (37) assignment -> CTE_ID . addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON
+    (91) addOperand -> .
 
-    LEFT_BRACKET    reduce using rule 28 (saveVariableID -> .)
+    EQUAL           reduce using rule 91 (addOperand -> .)
 
-    saveVariableID                 shift and go to state 72
+    addOperand                     shift and go to state 82
 
 state 69
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .
+    (32) writting -> PRINT . LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON
 
-    FUNC            reduce using rule 14 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
-    MAIN            reduce using rule 14 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
-    RIGHT_CURLY_BRACKET reduce using rule 14 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
+    LEFT_PAREN      shift and go to state 83
 
 
 state 70
 
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .
+    (68) if -> IF . LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF
 
-    FUNC            reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
-    MAIN            reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
-    RIGHT_CURLY_BRACKET reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars .)
+    LEFT_PAREN      shift and go to state 84
 
 
 state 71
 
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET SEMI_COLON vars
+    (72) while -> WHILE . LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile
 
-    RIGHT_BRACKET   shift and go to state 73
+    LEFT_PAREN      shift and go to state 85
 
 
 state 72
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (73) for -> FOR . LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody
 
-    LEFT_BRACKET    shift and go to state 74
+    LEFT_PAREN      shift and go to state 86
 
 
 state 73
 
-    (12) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_array
-    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON vars
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT . RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT . RIGHT_BRACKET SEMI_COLON auxVars
 
-    COMMA           shift and go to state 56
-    SEMI_COLON      shift and go to state 57
+    RIGHT_BRACKET   shift and go to state 87
 
 
 state 74
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (13) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+    (89) saveVariableID -> .
 
-    CTE_INT         shift and go to state 75
+    LEFT_BRACKET    reduce using rule 89 (saveVariableID -> .)
 
+    saveVariableID                 shift and go to state 88
 
 state 75
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .
 
-    RIGHT_BRACKET   shift and go to state 76
+    FUNC            reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
+    MAIN            reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
+    CTE_ID          reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
+    PRINT           reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
+    IF              reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
+    WHILE           reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
+    FOR             reduce using rule 13 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array .)
 
 
 state 76
 
-    (14) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON vars
+    (14) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .
 
-    LEFT_BRACKET    shift and go to state 55
+    FUNC            reduce using rule 14 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    MAIN            reduce using rule 14 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    CTE_ID          reduce using rule 14 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    PRINT           reduce using rule 14 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    IF              reduce using rule 14 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    WHILE           reduce using rule 14 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    FOR             reduce using rule 14 (vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+
+
+state 77
+
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction . endProgram endPrint
+    (78) endProgram -> .
+
+    $end            reduce using rule 78 (endProgram -> .)
+
+    endProgram                     shift and go to state 89
+
+state 78
+
+    (18) funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction .
+
+    FUNC            reduce using rule 18 (funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction .)
+    MAIN            reduce using rule 18 (funcs_aux -> FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction .)
+
+
+state 79
+
+    (19) funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .
+
+    FUNC            reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    MAIN            reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    $end            reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    ELSE            reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    VAR             reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    CTE_ID          reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    PRINT           reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    IF              reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    WHILE           reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    FOR             reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+    RIGHT_CURLY_BRACKET reduce using rule 19 (funcBody -> LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET .)
+
+
+state 80
+
+    (20) auxFuncBody -> vars statements . auxFuncBody
+    (20) auxFuncBody -> . vars statements auxFuncBody
+    (21) auxFuncBody -> . statements auxFuncBody
+    (22) auxFuncBody -> . empty
+    (6) vars -> . auxVars
+    (27) statements -> . assignment
+    (28) statements -> . writting
+    (29) statements -> . if
+    (30) statements -> . while
+    (31) statements -> . for
+    (104) empty -> .
+    (7) auxVars -> . VAR type vars_type_single
+    (8) auxVars -> . VAR type vars_type_array
+    (9) auxVars -> . VAR type vars_type_matrix
+    (10) auxVars -> . empty
+    (37) assignment -> . CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON
+    (32) writting -> . PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON
+    (68) if -> . IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF
+    (72) while -> . WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile
+    (73) for -> . FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody
+
+  ! shift/reduce conflict for CTE_ID resolved as shift
+  ! shift/reduce conflict for PRINT resolved as shift
+  ! shift/reduce conflict for IF resolved as shift
+  ! shift/reduce conflict for WHILE resolved as shift
+  ! shift/reduce conflict for FOR resolved as shift
+    RIGHT_CURLY_BRACKET reduce using rule 104 (empty -> .)
+    VAR             shift and go to state 10
+    CTE_ID          shift and go to state 68
+    PRINT           shift and go to state 69
+    IF              shift and go to state 70
+    WHILE           shift and go to state 71
+    FOR             shift and go to state 72
+
+  ! CTE_ID          [ reduce using rule 104 (empty -> .) ]
+  ! PRINT           [ reduce using rule 104 (empty -> .) ]
+  ! IF              [ reduce using rule 104 (empty -> .) ]
+  ! WHILE           [ reduce using rule 104 (empty -> .) ]
+  ! FOR             [ reduce using rule 104 (empty -> .) ]
+
+    vars                           shift and go to state 60
+    statements                     shift and go to state 61
+    auxFuncBody                    shift and go to state 90
+    empty                          shift and go to state 62
+    auxVars                        shift and go to state 9
+    assignment                     shift and go to state 63
+    writting                       shift and go to state 64
+    if                             shift and go to state 65
+    while                          shift and go to state 66
+    for                            shift and go to state 67
+
+state 81
+
+    (21) auxFuncBody -> statements auxFuncBody .
+
+    RIGHT_CURLY_BRACKET reduce using rule 21 (auxFuncBody -> statements auxFuncBody .)
+
+
+state 82
+
+    (37) assignment -> CTE_ID addOperand . EQUAL addOperator logicExpression doAssign SEMI_COLON
+
+    EQUAL           shift and go to state 91
+
+
+state 83
+
+    (32) writting -> PRINT LEFT_PAREN . auxWritting RIGHT_PAREN SEMI_COLON
+    (33) auxWritting -> . logicExpression doWrite multipleWrite
+    (34) auxWritting -> . CTE_STRING doWriteString multipleWrite
+    (38) logicExpression -> . exp doLogicExpression auxLogicExpression
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    CTE_STRING      shift and go to state 95
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    auxWritting                    shift and go to state 93
+    logicExpression                shift and go to state 94
+    exp                            shift and go to state 96
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 84
+
+    (68) if -> IF LEFT_PAREN . logicExpression doIF RIGHT_PAREN funcBody else endIF
+    (38) logicExpression -> . exp doLogicExpression auxLogicExpression
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    logicExpression                shift and go to state 106
+    exp                            shift and go to state 96
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 85
+
+    (72) while -> WHILE LEFT_PAREN . addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile
+    (88) addCondStart -> .
+
+    LEFT_PAREN      reduce using rule 88 (addCondStart -> .)
+    CTE_ID          reduce using rule 88 (addCondStart -> .)
+    CTE_INT         reduce using rule 88 (addCondStart -> .)
+    CTE_FLOAT       reduce using rule 88 (addCondStart -> .)
+    CTE_STRING      reduce using rule 88 (addCondStart -> .)
+    TRUE            reduce using rule 88 (addCondStart -> .)
+    FALSE           reduce using rule 88 (addCondStart -> .)
+
+    addCondStart                   shift and go to state 108
+
+state 86
+
+    (73) for -> FOR LEFT_PAREN . CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody
+
+    CTE_ID          shift and go to state 109
+
+
+state 87
+
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON auxVars
+
+    COMMA           shift and go to state 110
+    SEMI_COLON      shift and go to state 111
+
+
+state 88
+
+    (13) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+
+    LEFT_BRACKET    shift and go to state 112
+
+
+state 89
+
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram . endPrint
+    (79) endPrint -> .
+
+    $end            reduce using rule 79 (endPrint -> .)
+
+    endPrint                       shift and go to state 113
+
+state 90
+
+    (20) auxFuncBody -> vars statements auxFuncBody .
+
+    RIGHT_CURLY_BRACKET reduce using rule 20 (auxFuncBody -> vars statements auxFuncBody .)
+
+
+state 91
+
+    (37) assignment -> CTE_ID addOperand EQUAL . addOperator logicExpression doAssign SEMI_COLON
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 114
+
+state 92
+
+    (60) factor -> LEFT_PAREN . addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (95) addParenthesis -> .
+
+    LEFT_PAREN      reduce using rule 95 (addParenthesis -> .)
+    CTE_ID          reduce using rule 95 (addParenthesis -> .)
+    CTE_INT         reduce using rule 95 (addParenthesis -> .)
+    CTE_FLOAT       reduce using rule 95 (addParenthesis -> .)
+    CTE_STRING      reduce using rule 95 (addParenthesis -> .)
+    TRUE            reduce using rule 95 (addParenthesis -> .)
+    FALSE           reduce using rule 95 (addParenthesis -> .)
+
+    addParenthesis                 shift and go to state 115
+
+state 93
+
+    (32) writting -> PRINT LEFT_PAREN auxWritting . RIGHT_PAREN SEMI_COLON
+
+    RIGHT_PAREN     shift and go to state 116
+
+
+state 94
+
+    (33) auxWritting -> logicExpression . doWrite multipleWrite
+    (102) doWrite -> .
+
+    COMMA           reduce using rule 102 (doWrite -> .)
+    RIGHT_PAREN     reduce using rule 102 (doWrite -> .)
+
+    doWrite                        shift and go to state 117
+
+state 95
+
+    (34) auxWritting -> CTE_STRING . doWriteString multipleWrite
+    (65) constants -> CTE_STRING . addConstantOperand
+    (103) doWriteString -> .
+    (92) addConstantOperand -> .
+
+  ! reduce/reduce conflict for COMMA resolved using rule 92 (addConstantOperand -> .)
+  ! reduce/reduce conflict for RIGHT_PAREN resolved using rule 92 (addConstantOperand -> .)
+    TIMES           reduce using rule 92 (addConstantOperand -> .)
+    DIV             reduce using rule 92 (addConstantOperand -> .)
+    MOD             reduce using rule 92 (addConstantOperand -> .)
+    EXP             reduce using rule 92 (addConstantOperand -> .)
+    PLUS            reduce using rule 92 (addConstantOperand -> .)
+    MINUS           reduce using rule 92 (addConstantOperand -> .)
+    GREATER_THAN    reduce using rule 92 (addConstantOperand -> .)
+    GREATER_EQUAL_THAN reduce using rule 92 (addConstantOperand -> .)
+    LESS_THAN       reduce using rule 92 (addConstantOperand -> .)
+    LESS_EQUAL_THAN reduce using rule 92 (addConstantOperand -> .)
+    NOT_EQUALS      reduce using rule 92 (addConstantOperand -> .)
+    EQUALS          reduce using rule 92 (addConstantOperand -> .)
+    AND             reduce using rule 92 (addConstantOperand -> .)
+    OR              reduce using rule 92 (addConstantOperand -> .)
+    COMMA           reduce using rule 92 (addConstantOperand -> .)
+    RIGHT_PAREN     reduce using rule 92 (addConstantOperand -> .)
+
+  ! COMMA           [ reduce using rule 103 (doWriteString -> .) ]
+  ! RIGHT_PAREN     [ reduce using rule 103 (doWriteString -> .) ]
+
+    doWriteString                  shift and go to state 118
+    addConstantOperand             shift and go to state 119
+
+state 96
+
+    (38) logicExpression -> exp . doLogicExpression auxLogicExpression
+    (97) doLogicExpression -> .
+
+    AND             reduce using rule 97 (doLogicExpression -> .)
+    OR              reduce using rule 97 (doLogicExpression -> .)
+    COMMA           reduce using rule 97 (doLogicExpression -> .)
+    RIGHT_PAREN     reduce using rule 97 (doLogicExpression -> .)
+    SEMI_COLON      reduce using rule 97 (doLogicExpression -> .)
+
+    doLogicExpression              shift and go to state 120
+
+state 97
+
+    (42) exp -> exp2 . doCompExpression auxExp
+    (98) doCompExpression -> .
+
+    GREATER_THAN    reduce using rule 98 (doCompExpression -> .)
+    GREATER_EQUAL_THAN reduce using rule 98 (doCompExpression -> .)
+    LESS_THAN       reduce using rule 98 (doCompExpression -> .)
+    LESS_EQUAL_THAN reduce using rule 98 (doCompExpression -> .)
+    NOT_EQUALS      reduce using rule 98 (doCompExpression -> .)
+    EQUALS          reduce using rule 98 (doCompExpression -> .)
+    AND             reduce using rule 98 (doCompExpression -> .)
+    OR              reduce using rule 98 (doCompExpression -> .)
+    COMMA           reduce using rule 98 (doCompExpression -> .)
+    RIGHT_PAREN     reduce using rule 98 (doCompExpression -> .)
+    SEMI_COLON      reduce using rule 98 (doCompExpression -> .)
+
+    doCompExpression               shift and go to state 121
+
+state 98
+
+    (50) exp2 -> term . doExpression exp2Aux
+    (99) doExpression -> .
+
+    PLUS            reduce using rule 99 (doExpression -> .)
+    MINUS           reduce using rule 99 (doExpression -> .)
+    GREATER_THAN    reduce using rule 99 (doExpression -> .)
+    GREATER_EQUAL_THAN reduce using rule 99 (doExpression -> .)
+    LESS_THAN       reduce using rule 99 (doExpression -> .)
+    LESS_EQUAL_THAN reduce using rule 99 (doExpression -> .)
+    NOT_EQUALS      reduce using rule 99 (doExpression -> .)
+    EQUALS          reduce using rule 99 (doExpression -> .)
+    AND             reduce using rule 99 (doExpression -> .)
+    OR              reduce using rule 99 (doExpression -> .)
+    COMMA           reduce using rule 99 (doExpression -> .)
+    RIGHT_PAREN     reduce using rule 99 (doExpression -> .)
+    SEMI_COLON      reduce using rule 99 (doExpression -> .)
+
+    doExpression                   shift and go to state 122
+
+state 99
+
+    (54) term -> factor . doTerm auxTerm
+    (100) doTerm -> .
+
+    TIMES           reduce using rule 100 (doTerm -> .)
+    DIV             reduce using rule 100 (doTerm -> .)
+    MOD             reduce using rule 100 (doTerm -> .)
+    EXP             reduce using rule 100 (doTerm -> .)
+    PLUS            reduce using rule 100 (doTerm -> .)
+    MINUS           reduce using rule 100 (doTerm -> .)
+    GREATER_THAN    reduce using rule 100 (doTerm -> .)
+    GREATER_EQUAL_THAN reduce using rule 100 (doTerm -> .)
+    LESS_THAN       reduce using rule 100 (doTerm -> .)
+    LESS_EQUAL_THAN reduce using rule 100 (doTerm -> .)
+    NOT_EQUALS      reduce using rule 100 (doTerm -> .)
+    EQUALS          reduce using rule 100 (doTerm -> .)
+    AND             reduce using rule 100 (doTerm -> .)
+    OR              reduce using rule 100 (doTerm -> .)
+    COMMA           reduce using rule 100 (doTerm -> .)
+    RIGHT_PAREN     reduce using rule 100 (doTerm -> .)
+    SEMI_COLON      reduce using rule 100 (doTerm -> .)
+
+    doTerm                         shift and go to state 123
+
+state 100
+
+    (61) factor -> constants .
+
+    TIMES           reduce using rule 61 (factor -> constants .)
+    DIV             reduce using rule 61 (factor -> constants .)
+    MOD             reduce using rule 61 (factor -> constants .)
+    EXP             reduce using rule 61 (factor -> constants .)
+    PLUS            reduce using rule 61 (factor -> constants .)
+    MINUS           reduce using rule 61 (factor -> constants .)
+    GREATER_THAN    reduce using rule 61 (factor -> constants .)
+    GREATER_EQUAL_THAN reduce using rule 61 (factor -> constants .)
+    LESS_THAN       reduce using rule 61 (factor -> constants .)
+    LESS_EQUAL_THAN reduce using rule 61 (factor -> constants .)
+    NOT_EQUALS      reduce using rule 61 (factor -> constants .)
+    EQUALS          reduce using rule 61 (factor -> constants .)
+    AND             reduce using rule 61 (factor -> constants .)
+    OR              reduce using rule 61 (factor -> constants .)
+    COMMA           reduce using rule 61 (factor -> constants .)
+    RIGHT_PAREN     reduce using rule 61 (factor -> constants .)
+    SEMI_COLON      reduce using rule 61 (factor -> constants .)
+
+
+state 101
+
+    (62) constants -> CTE_ID . addOperand
+    (91) addOperand -> .
+
+    TIMES           reduce using rule 91 (addOperand -> .)
+    DIV             reduce using rule 91 (addOperand -> .)
+    MOD             reduce using rule 91 (addOperand -> .)
+    EXP             reduce using rule 91 (addOperand -> .)
+    PLUS            reduce using rule 91 (addOperand -> .)
+    MINUS           reduce using rule 91 (addOperand -> .)
+    GREATER_THAN    reduce using rule 91 (addOperand -> .)
+    GREATER_EQUAL_THAN reduce using rule 91 (addOperand -> .)
+    LESS_THAN       reduce using rule 91 (addOperand -> .)
+    LESS_EQUAL_THAN reduce using rule 91 (addOperand -> .)
+    NOT_EQUALS      reduce using rule 91 (addOperand -> .)
+    EQUALS          reduce using rule 91 (addOperand -> .)
+    AND             reduce using rule 91 (addOperand -> .)
+    OR              reduce using rule 91 (addOperand -> .)
+    COMMA           reduce using rule 91 (addOperand -> .)
+    RIGHT_PAREN     reduce using rule 91 (addOperand -> .)
+    SEMI_COLON      reduce using rule 91 (addOperand -> .)
+
+    addOperand                     shift and go to state 124
+
+state 102
+
+    (63) constants -> CTE_INT . addConstantOperand
+    (92) addConstantOperand -> .
+
+    TIMES           reduce using rule 92 (addConstantOperand -> .)
+    DIV             reduce using rule 92 (addConstantOperand -> .)
+    MOD             reduce using rule 92 (addConstantOperand -> .)
+    EXP             reduce using rule 92 (addConstantOperand -> .)
+    PLUS            reduce using rule 92 (addConstantOperand -> .)
+    MINUS           reduce using rule 92 (addConstantOperand -> .)
+    GREATER_THAN    reduce using rule 92 (addConstantOperand -> .)
+    GREATER_EQUAL_THAN reduce using rule 92 (addConstantOperand -> .)
+    LESS_THAN       reduce using rule 92 (addConstantOperand -> .)
+    LESS_EQUAL_THAN reduce using rule 92 (addConstantOperand -> .)
+    NOT_EQUALS      reduce using rule 92 (addConstantOperand -> .)
+    EQUALS          reduce using rule 92 (addConstantOperand -> .)
+    AND             reduce using rule 92 (addConstantOperand -> .)
+    OR              reduce using rule 92 (addConstantOperand -> .)
+    COMMA           reduce using rule 92 (addConstantOperand -> .)
+    RIGHT_PAREN     reduce using rule 92 (addConstantOperand -> .)
+    SEMI_COLON      reduce using rule 92 (addConstantOperand -> .)
+
+    addConstantOperand             shift and go to state 125
+
+state 103
+
+    (64) constants -> CTE_FLOAT . addConstantOperand
+    (92) addConstantOperand -> .
+
+    TIMES           reduce using rule 92 (addConstantOperand -> .)
+    DIV             reduce using rule 92 (addConstantOperand -> .)
+    MOD             reduce using rule 92 (addConstantOperand -> .)
+    EXP             reduce using rule 92 (addConstantOperand -> .)
+    PLUS            reduce using rule 92 (addConstantOperand -> .)
+    MINUS           reduce using rule 92 (addConstantOperand -> .)
+    GREATER_THAN    reduce using rule 92 (addConstantOperand -> .)
+    GREATER_EQUAL_THAN reduce using rule 92 (addConstantOperand -> .)
+    LESS_THAN       reduce using rule 92 (addConstantOperand -> .)
+    LESS_EQUAL_THAN reduce using rule 92 (addConstantOperand -> .)
+    NOT_EQUALS      reduce using rule 92 (addConstantOperand -> .)
+    EQUALS          reduce using rule 92 (addConstantOperand -> .)
+    AND             reduce using rule 92 (addConstantOperand -> .)
+    OR              reduce using rule 92 (addConstantOperand -> .)
+    COMMA           reduce using rule 92 (addConstantOperand -> .)
+    RIGHT_PAREN     reduce using rule 92 (addConstantOperand -> .)
+    SEMI_COLON      reduce using rule 92 (addConstantOperand -> .)
+
+    addConstantOperand             shift and go to state 126
+
+state 104
+
+    (66) constants -> TRUE . addConstantBool
+    (93) addConstantBool -> .
+
+    TIMES           reduce using rule 93 (addConstantBool -> .)
+    DIV             reduce using rule 93 (addConstantBool -> .)
+    MOD             reduce using rule 93 (addConstantBool -> .)
+    EXP             reduce using rule 93 (addConstantBool -> .)
+    PLUS            reduce using rule 93 (addConstantBool -> .)
+    MINUS           reduce using rule 93 (addConstantBool -> .)
+    GREATER_THAN    reduce using rule 93 (addConstantBool -> .)
+    GREATER_EQUAL_THAN reduce using rule 93 (addConstantBool -> .)
+    LESS_THAN       reduce using rule 93 (addConstantBool -> .)
+    LESS_EQUAL_THAN reduce using rule 93 (addConstantBool -> .)
+    NOT_EQUALS      reduce using rule 93 (addConstantBool -> .)
+    EQUALS          reduce using rule 93 (addConstantBool -> .)
+    AND             reduce using rule 93 (addConstantBool -> .)
+    OR              reduce using rule 93 (addConstantBool -> .)
+    COMMA           reduce using rule 93 (addConstantBool -> .)
+    RIGHT_PAREN     reduce using rule 93 (addConstantBool -> .)
+    SEMI_COLON      reduce using rule 93 (addConstantBool -> .)
+
+    addConstantBool                shift and go to state 127
+
+state 105
+
+    (67) constants -> FALSE . addConstantBool
+    (93) addConstantBool -> .
+
+    TIMES           reduce using rule 93 (addConstantBool -> .)
+    DIV             reduce using rule 93 (addConstantBool -> .)
+    MOD             reduce using rule 93 (addConstantBool -> .)
+    EXP             reduce using rule 93 (addConstantBool -> .)
+    PLUS            reduce using rule 93 (addConstantBool -> .)
+    MINUS           reduce using rule 93 (addConstantBool -> .)
+    GREATER_THAN    reduce using rule 93 (addConstantBool -> .)
+    GREATER_EQUAL_THAN reduce using rule 93 (addConstantBool -> .)
+    LESS_THAN       reduce using rule 93 (addConstantBool -> .)
+    LESS_EQUAL_THAN reduce using rule 93 (addConstantBool -> .)
+    NOT_EQUALS      reduce using rule 93 (addConstantBool -> .)
+    EQUALS          reduce using rule 93 (addConstantBool -> .)
+    AND             reduce using rule 93 (addConstantBool -> .)
+    OR              reduce using rule 93 (addConstantBool -> .)
+    COMMA           reduce using rule 93 (addConstantBool -> .)
+    RIGHT_PAREN     reduce using rule 93 (addConstantBool -> .)
+    SEMI_COLON      reduce using rule 93 (addConstantBool -> .)
+
+    addConstantBool                shift and go to state 128
+
+state 106
+
+    (68) if -> IF LEFT_PAREN logicExpression . doIF RIGHT_PAREN funcBody else endIF
+    (83) doIF -> .
+
+    RIGHT_PAREN     reduce using rule 83 (doIF -> .)
+
+    doIF                           shift and go to state 129
+
+state 107
+
+    (65) constants -> CTE_STRING . addConstantOperand
+    (92) addConstantOperand -> .
+
+    TIMES           reduce using rule 92 (addConstantOperand -> .)
+    DIV             reduce using rule 92 (addConstantOperand -> .)
+    MOD             reduce using rule 92 (addConstantOperand -> .)
+    EXP             reduce using rule 92 (addConstantOperand -> .)
+    PLUS            reduce using rule 92 (addConstantOperand -> .)
+    MINUS           reduce using rule 92 (addConstantOperand -> .)
+    GREATER_THAN    reduce using rule 92 (addConstantOperand -> .)
+    GREATER_EQUAL_THAN reduce using rule 92 (addConstantOperand -> .)
+    LESS_THAN       reduce using rule 92 (addConstantOperand -> .)
+    LESS_EQUAL_THAN reduce using rule 92 (addConstantOperand -> .)
+    NOT_EQUALS      reduce using rule 92 (addConstantOperand -> .)
+    EQUALS          reduce using rule 92 (addConstantOperand -> .)
+    AND             reduce using rule 92 (addConstantOperand -> .)
+    OR              reduce using rule 92 (addConstantOperand -> .)
+    RIGHT_PAREN     reduce using rule 92 (addConstantOperand -> .)
+    SEMI_COLON      reduce using rule 92 (addConstantOperand -> .)
+    COMMA           reduce using rule 92 (addConstantOperand -> .)
+
+    addConstantOperand             shift and go to state 119
+
+state 108
+
+    (72) while -> WHILE LEFT_PAREN addCondStart . logicExpression doWhile RIGHT_PAREN funcBody endWhile
+    (38) logicExpression -> . exp doLogicExpression auxLogicExpression
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    logicExpression                shift and go to state 130
+    exp                            shift and go to state 96
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 109
+
+    (73) for -> FOR LEFT_PAREN CTE_ID . COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody
+
+    COMMA           shift and go to state 131
+
+
+state 110
+
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA . vars_type_matrix
+    (15) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> . CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+
+    CTE_ID          shift and go to state 132
+
+    vars_type_matrix               shift and go to state 133
+
+state 111
+
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON . auxVars
+    (7) auxVars -> . VAR type vars_type_single
+    (8) auxVars -> . VAR type vars_type_array
+    (9) auxVars -> . VAR type vars_type_matrix
+    (10) auxVars -> . empty
+    (104) empty -> .
+
+    VAR             shift and go to state 10
+    FUNC            reduce using rule 104 (empty -> .)
+    MAIN            reduce using rule 104 (empty -> .)
+    CTE_ID          reduce using rule 104 (empty -> .)
+    PRINT           reduce using rule 104 (empty -> .)
+    IF              reduce using rule 104 (empty -> .)
+    WHILE           reduce using rule 104 (empty -> .)
+    FOR             reduce using rule 104 (empty -> .)
+
+    auxVars                        shift and go to state 134
+    empty                          shift and go to state 45
+
+state 112
+
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+
+    CTE_INT         shift and go to state 135
+
+
+state 113
+
+    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint .
+
+    $end            reduce using rule 1 (program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram endPrint .)
+
+
+state 114
+
+    (37) assignment -> CTE_ID addOperand EQUAL addOperator . logicExpression doAssign SEMI_COLON
+    (38) logicExpression -> . exp doLogicExpression auxLogicExpression
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    logicExpression                shift and go to state 136
+    exp                            shift and go to state 96
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 115
+
+    (60) factor -> LEFT_PAREN addParenthesis . logicExpression RIGHT_PAREN removeParenthesis
+    (38) logicExpression -> . exp doLogicExpression auxLogicExpression
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    logicExpression                shift and go to state 137
+    exp                            shift and go to state 96
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 116
+
+    (32) writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN . SEMI_COLON
+
+    SEMI_COLON      shift and go to state 138
+
+
+state 117
+
+    (33) auxWritting -> logicExpression doWrite . multipleWrite
+    (35) multipleWrite -> . COMMA auxWritting
+    (36) multipleWrite -> . empty
+    (104) empty -> .
+
+    COMMA           shift and go to state 140
+    RIGHT_PAREN     reduce using rule 104 (empty -> .)
+
+    multipleWrite                  shift and go to state 139
+    empty                          shift and go to state 141
+
+state 118
+
+    (34) auxWritting -> CTE_STRING doWriteString . multipleWrite
+    (35) multipleWrite -> . COMMA auxWritting
+    (36) multipleWrite -> . empty
+    (104) empty -> .
+
+    COMMA           shift and go to state 140
+    RIGHT_PAREN     reduce using rule 104 (empty -> .)
+
+    multipleWrite                  shift and go to state 142
+    empty                          shift and go to state 141
+
+state 119
+
+    (65) constants -> CTE_STRING addConstantOperand .
+
+    TIMES           reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    DIV             reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    MOD             reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    EXP             reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    PLUS            reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    MINUS           reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    GREATER_THAN    reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    GREATER_EQUAL_THAN reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    LESS_THAN       reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    LESS_EQUAL_THAN reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    NOT_EQUALS      reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    EQUALS          reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    AND             reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    OR              reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    COMMA           reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    RIGHT_PAREN     reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+    SEMI_COLON      reduce using rule 65 (constants -> CTE_STRING addConstantOperand .)
+
+
+state 120
+
+    (38) logicExpression -> exp doLogicExpression . auxLogicExpression
+    (39) auxLogicExpression -> . AND addOperator logicExpression
+    (40) auxLogicExpression -> . OR addOperator logicExpression
+    (41) auxLogicExpression -> . empty
+    (104) empty -> .
+
+    AND             shift and go to state 144
+    OR              shift and go to state 145
+    COMMA           reduce using rule 104 (empty -> .)
+    RIGHT_PAREN     reduce using rule 104 (empty -> .)
+    SEMI_COLON      reduce using rule 104 (empty -> .)
+
+    auxLogicExpression             shift and go to state 143
+    empty                          shift and go to state 146
+
+state 121
+
+    (42) exp -> exp2 doCompExpression . auxExp
+    (43) auxExp -> . GREATER_THAN addOperator exp
+    (44) auxExp -> . GREATER_EQUAL_THAN addOperator exp
+    (45) auxExp -> . LESS_THAN addOperator exp
+    (46) auxExp -> . LESS_EQUAL_THAN addOperator exp
+    (47) auxExp -> . NOT_EQUALS addOperator exp
+    (48) auxExp -> . EQUALS addOperator exp
+    (49) auxExp -> . empty
+    (104) empty -> .
+
+    GREATER_THAN    shift and go to state 148
+    GREATER_EQUAL_THAN shift and go to state 149
+    LESS_THAN       shift and go to state 150
+    LESS_EQUAL_THAN shift and go to state 151
+    NOT_EQUALS      shift and go to state 152
+    EQUALS          shift and go to state 153
+    AND             reduce using rule 104 (empty -> .)
+    OR              reduce using rule 104 (empty -> .)
+    COMMA           reduce using rule 104 (empty -> .)
+    RIGHT_PAREN     reduce using rule 104 (empty -> .)
+    SEMI_COLON      reduce using rule 104 (empty -> .)
+
+    auxExp                         shift and go to state 147
+    empty                          shift and go to state 154
+
+state 122
+
+    (50) exp2 -> term doExpression . exp2Aux
+    (51) exp2Aux -> . PLUS addOperator exp2
+    (52) exp2Aux -> . MINUS addOperator exp2
+    (53) exp2Aux -> . empty
+    (104) empty -> .
+
+    PLUS            shift and go to state 156
+    MINUS           shift and go to state 157
+    GREATER_THAN    reduce using rule 104 (empty -> .)
+    GREATER_EQUAL_THAN reduce using rule 104 (empty -> .)
+    LESS_THAN       reduce using rule 104 (empty -> .)
+    LESS_EQUAL_THAN reduce using rule 104 (empty -> .)
+    NOT_EQUALS      reduce using rule 104 (empty -> .)
+    EQUALS          reduce using rule 104 (empty -> .)
+    AND             reduce using rule 104 (empty -> .)
+    OR              reduce using rule 104 (empty -> .)
+    COMMA           reduce using rule 104 (empty -> .)
+    RIGHT_PAREN     reduce using rule 104 (empty -> .)
+    SEMI_COLON      reduce using rule 104 (empty -> .)
+
+    exp2Aux                        shift and go to state 155
+    empty                          shift and go to state 158
+
+state 123
+
+    (54) term -> factor doTerm . auxTerm
+    (55) auxTerm -> . TIMES addOperator term
+    (56) auxTerm -> . DIV addOperator term
+    (57) auxTerm -> . MOD addOperator term
+    (58) auxTerm -> . EXP addOperator term
+    (59) auxTerm -> . empty
+    (104) empty -> .
+
+    TIMES           shift and go to state 160
+    DIV             shift and go to state 161
+    MOD             shift and go to state 162
+    EXP             shift and go to state 163
+    PLUS            reduce using rule 104 (empty -> .)
+    MINUS           reduce using rule 104 (empty -> .)
+    GREATER_THAN    reduce using rule 104 (empty -> .)
+    GREATER_EQUAL_THAN reduce using rule 104 (empty -> .)
+    LESS_THAN       reduce using rule 104 (empty -> .)
+    LESS_EQUAL_THAN reduce using rule 104 (empty -> .)
+    NOT_EQUALS      reduce using rule 104 (empty -> .)
+    EQUALS          reduce using rule 104 (empty -> .)
+    AND             reduce using rule 104 (empty -> .)
+    OR              reduce using rule 104 (empty -> .)
+    COMMA           reduce using rule 104 (empty -> .)
+    RIGHT_PAREN     reduce using rule 104 (empty -> .)
+    SEMI_COLON      reduce using rule 104 (empty -> .)
+
+    auxTerm                        shift and go to state 159
+    empty                          shift and go to state 164
+
+state 124
+
+    (62) constants -> CTE_ID addOperand .
+
+    TIMES           reduce using rule 62 (constants -> CTE_ID addOperand .)
+    DIV             reduce using rule 62 (constants -> CTE_ID addOperand .)
+    MOD             reduce using rule 62 (constants -> CTE_ID addOperand .)
+    EXP             reduce using rule 62 (constants -> CTE_ID addOperand .)
+    PLUS            reduce using rule 62 (constants -> CTE_ID addOperand .)
+    MINUS           reduce using rule 62 (constants -> CTE_ID addOperand .)
+    GREATER_THAN    reduce using rule 62 (constants -> CTE_ID addOperand .)
+    GREATER_EQUAL_THAN reduce using rule 62 (constants -> CTE_ID addOperand .)
+    LESS_THAN       reduce using rule 62 (constants -> CTE_ID addOperand .)
+    LESS_EQUAL_THAN reduce using rule 62 (constants -> CTE_ID addOperand .)
+    NOT_EQUALS      reduce using rule 62 (constants -> CTE_ID addOperand .)
+    EQUALS          reduce using rule 62 (constants -> CTE_ID addOperand .)
+    AND             reduce using rule 62 (constants -> CTE_ID addOperand .)
+    OR              reduce using rule 62 (constants -> CTE_ID addOperand .)
+    COMMA           reduce using rule 62 (constants -> CTE_ID addOperand .)
+    RIGHT_PAREN     reduce using rule 62 (constants -> CTE_ID addOperand .)
+    SEMI_COLON      reduce using rule 62 (constants -> CTE_ID addOperand .)
+
+
+state 125
+
+    (63) constants -> CTE_INT addConstantOperand .
+
+    TIMES           reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    DIV             reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    MOD             reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    EXP             reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    PLUS            reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    MINUS           reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    GREATER_THAN    reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    GREATER_EQUAL_THAN reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    LESS_THAN       reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    LESS_EQUAL_THAN reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    NOT_EQUALS      reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    EQUALS          reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    AND             reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    OR              reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    COMMA           reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    RIGHT_PAREN     reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+    SEMI_COLON      reduce using rule 63 (constants -> CTE_INT addConstantOperand .)
+
+
+state 126
+
+    (64) constants -> CTE_FLOAT addConstantOperand .
+
+    TIMES           reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    DIV             reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    MOD             reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    EXP             reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    PLUS            reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    MINUS           reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    GREATER_THAN    reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    GREATER_EQUAL_THAN reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    LESS_THAN       reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    LESS_EQUAL_THAN reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    NOT_EQUALS      reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    EQUALS          reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    AND             reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    OR              reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    COMMA           reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    RIGHT_PAREN     reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+    SEMI_COLON      reduce using rule 64 (constants -> CTE_FLOAT addConstantOperand .)
+
+
+state 127
+
+    (66) constants -> TRUE addConstantBool .
+
+    TIMES           reduce using rule 66 (constants -> TRUE addConstantBool .)
+    DIV             reduce using rule 66 (constants -> TRUE addConstantBool .)
+    MOD             reduce using rule 66 (constants -> TRUE addConstantBool .)
+    EXP             reduce using rule 66 (constants -> TRUE addConstantBool .)
+    PLUS            reduce using rule 66 (constants -> TRUE addConstantBool .)
+    MINUS           reduce using rule 66 (constants -> TRUE addConstantBool .)
+    GREATER_THAN    reduce using rule 66 (constants -> TRUE addConstantBool .)
+    GREATER_EQUAL_THAN reduce using rule 66 (constants -> TRUE addConstantBool .)
+    LESS_THAN       reduce using rule 66 (constants -> TRUE addConstantBool .)
+    LESS_EQUAL_THAN reduce using rule 66 (constants -> TRUE addConstantBool .)
+    NOT_EQUALS      reduce using rule 66 (constants -> TRUE addConstantBool .)
+    EQUALS          reduce using rule 66 (constants -> TRUE addConstantBool .)
+    AND             reduce using rule 66 (constants -> TRUE addConstantBool .)
+    OR              reduce using rule 66 (constants -> TRUE addConstantBool .)
+    COMMA           reduce using rule 66 (constants -> TRUE addConstantBool .)
+    RIGHT_PAREN     reduce using rule 66 (constants -> TRUE addConstantBool .)
+    SEMI_COLON      reduce using rule 66 (constants -> TRUE addConstantBool .)
+
+
+state 128
+
+    (67) constants -> FALSE addConstantBool .
+
+    TIMES           reduce using rule 67 (constants -> FALSE addConstantBool .)
+    DIV             reduce using rule 67 (constants -> FALSE addConstantBool .)
+    MOD             reduce using rule 67 (constants -> FALSE addConstantBool .)
+    EXP             reduce using rule 67 (constants -> FALSE addConstantBool .)
+    PLUS            reduce using rule 67 (constants -> FALSE addConstantBool .)
+    MINUS           reduce using rule 67 (constants -> FALSE addConstantBool .)
+    GREATER_THAN    reduce using rule 67 (constants -> FALSE addConstantBool .)
+    GREATER_EQUAL_THAN reduce using rule 67 (constants -> FALSE addConstantBool .)
+    LESS_THAN       reduce using rule 67 (constants -> FALSE addConstantBool .)
+    LESS_EQUAL_THAN reduce using rule 67 (constants -> FALSE addConstantBool .)
+    NOT_EQUALS      reduce using rule 67 (constants -> FALSE addConstantBool .)
+    EQUALS          reduce using rule 67 (constants -> FALSE addConstantBool .)
+    AND             reduce using rule 67 (constants -> FALSE addConstantBool .)
+    OR              reduce using rule 67 (constants -> FALSE addConstantBool .)
+    COMMA           reduce using rule 67 (constants -> FALSE addConstantBool .)
+    RIGHT_PAREN     reduce using rule 67 (constants -> FALSE addConstantBool .)
+    SEMI_COLON      reduce using rule 67 (constants -> FALSE addConstantBool .)
+
+
+state 129
+
+    (68) if -> IF LEFT_PAREN logicExpression doIF . RIGHT_PAREN funcBody else endIF
+
+    RIGHT_PAREN     shift and go to state 165
+
+
+state 130
+
+    (72) while -> WHILE LEFT_PAREN addCondStart logicExpression . doWhile RIGHT_PAREN funcBody endWhile
+    (86) doWhile -> .
+
+    RIGHT_PAREN     reduce using rule 86 (doWhile -> .)
+
+    doWhile                        shift and go to state 166
+
+state 131
+
+    (73) for -> FOR LEFT_PAREN CTE_ID COMMA . auxFor COMMA auxFor RIGHT_PAREN funcBody
+    (74) auxFor -> . CTE_ID
+    (75) auxFor -> . CTE_INT
+
+    CTE_ID          shift and go to state 167
+    CTE_INT         shift and go to state 169
+
+    auxFor                         shift and go to state 168
+
+state 132
+
+    (15) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID . saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+    (89) saveVariableID -> .
+
+    LEFT_BRACKET    reduce using rule 89 (saveVariableID -> .)
+
+    saveVariableID                 shift and go to state 170
+
+state 133
+
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .
+
+    FUNC            reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
+    MAIN            reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
+    CTE_ID          reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
+    PRINT           reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
+    IF              reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
+    WHILE           reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
+    FOR             reduce using rule 15 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix .)
+
+
+state 134
+
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .
+
+    FUNC            reduce using rule 16 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    MAIN            reduce using rule 16 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    CTE_ID          reduce using rule 16 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    PRINT           reduce using rule 16 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    IF              reduce using rule 16 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    WHILE           reduce using rule 16 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+    FOR             reduce using rule 16 (vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars .)
+
+
+state 135
+
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET SEMI_COLON auxVars
+
+    RIGHT_BRACKET   shift and go to state 171
+
+
+state 136
+
+    (37) assignment -> CTE_ID addOperand EQUAL addOperator logicExpression . doAssign SEMI_COLON
+    (101) doAssign -> .
+
+    SEMI_COLON      reduce using rule 101 (doAssign -> .)
+
+    doAssign                       shift and go to state 172
+
+state 137
+
+    (60) factor -> LEFT_PAREN addParenthesis logicExpression . RIGHT_PAREN removeParenthesis
+
+    RIGHT_PAREN     shift and go to state 173
+
+
+state 138
+
+    (32) writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON .
+
+    VAR             reduce using rule 32 (writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON .)
+    CTE_ID          reduce using rule 32 (writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON .)
+    PRINT           reduce using rule 32 (writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON .)
+    IF              reduce using rule 32 (writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON .)
+    WHILE           reduce using rule 32 (writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON .)
+    FOR             reduce using rule 32 (writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON .)
+    RIGHT_CURLY_BRACKET reduce using rule 32 (writting -> PRINT LEFT_PAREN auxWritting RIGHT_PAREN SEMI_COLON .)
+
+
+state 139
+
+    (33) auxWritting -> logicExpression doWrite multipleWrite .
+
+    RIGHT_PAREN     reduce using rule 33 (auxWritting -> logicExpression doWrite multipleWrite .)
+
+
+state 140
+
+    (35) multipleWrite -> COMMA . auxWritting
+    (33) auxWritting -> . logicExpression doWrite multipleWrite
+    (34) auxWritting -> . CTE_STRING doWriteString multipleWrite
+    (38) logicExpression -> . exp doLogicExpression auxLogicExpression
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    CTE_STRING      shift and go to state 95
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    auxWritting                    shift and go to state 174
+    logicExpression                shift and go to state 94
+    exp                            shift and go to state 96
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 141
+
+    (36) multipleWrite -> empty .
+
+    RIGHT_PAREN     reduce using rule 36 (multipleWrite -> empty .)
+
+
+state 142
+
+    (34) auxWritting -> CTE_STRING doWriteString multipleWrite .
+
+    RIGHT_PAREN     reduce using rule 34 (auxWritting -> CTE_STRING doWriteString multipleWrite .)
+
+
+state 143
+
+    (38) logicExpression -> exp doLogicExpression auxLogicExpression .
+
+    COMMA           reduce using rule 38 (logicExpression -> exp doLogicExpression auxLogicExpression .)
+    RIGHT_PAREN     reduce using rule 38 (logicExpression -> exp doLogicExpression auxLogicExpression .)
+    SEMI_COLON      reduce using rule 38 (logicExpression -> exp doLogicExpression auxLogicExpression .)
+
+
+state 144
+
+    (39) auxLogicExpression -> AND . addOperator logicExpression
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 175
+
+state 145
+
+    (40) auxLogicExpression -> OR . addOperator logicExpression
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 176
+
+state 146
+
+    (41) auxLogicExpression -> empty .
+
+    COMMA           reduce using rule 41 (auxLogicExpression -> empty .)
+    RIGHT_PAREN     reduce using rule 41 (auxLogicExpression -> empty .)
+    SEMI_COLON      reduce using rule 41 (auxLogicExpression -> empty .)
+
+
+state 147
+
+    (42) exp -> exp2 doCompExpression auxExp .
+
+    AND             reduce using rule 42 (exp -> exp2 doCompExpression auxExp .)
+    OR              reduce using rule 42 (exp -> exp2 doCompExpression auxExp .)
+    COMMA           reduce using rule 42 (exp -> exp2 doCompExpression auxExp .)
+    RIGHT_PAREN     reduce using rule 42 (exp -> exp2 doCompExpression auxExp .)
+    SEMI_COLON      reduce using rule 42 (exp -> exp2 doCompExpression auxExp .)
+
+
+state 148
+
+    (43) auxExp -> GREATER_THAN . addOperator exp
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 177
+
+state 149
+
+    (44) auxExp -> GREATER_EQUAL_THAN . addOperator exp
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 178
+
+state 150
+
+    (45) auxExp -> LESS_THAN . addOperator exp
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 179
+
+state 151
+
+    (46) auxExp -> LESS_EQUAL_THAN . addOperator exp
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 180
+
+state 152
+
+    (47) auxExp -> NOT_EQUALS . addOperator exp
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 181
+
+state 153
+
+    (48) auxExp -> EQUALS . addOperator exp
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 182
+
+state 154
+
+    (49) auxExp -> empty .
+
+    AND             reduce using rule 49 (auxExp -> empty .)
+    OR              reduce using rule 49 (auxExp -> empty .)
+    COMMA           reduce using rule 49 (auxExp -> empty .)
+    RIGHT_PAREN     reduce using rule 49 (auxExp -> empty .)
+    SEMI_COLON      reduce using rule 49 (auxExp -> empty .)
+
+
+state 155
+
+    (50) exp2 -> term doExpression exp2Aux .
+
+    GREATER_THAN    reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    GREATER_EQUAL_THAN reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    LESS_THAN       reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    LESS_EQUAL_THAN reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    NOT_EQUALS      reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    EQUALS          reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    AND             reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    OR              reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    COMMA           reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    RIGHT_PAREN     reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+    SEMI_COLON      reduce using rule 50 (exp2 -> term doExpression exp2Aux .)
+
+
+state 156
+
+    (51) exp2Aux -> PLUS . addOperator exp2
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 183
+
+state 157
+
+    (52) exp2Aux -> MINUS . addOperator exp2
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 184
+
+state 158
+
+    (53) exp2Aux -> empty .
+
+    GREATER_THAN    reduce using rule 53 (exp2Aux -> empty .)
+    GREATER_EQUAL_THAN reduce using rule 53 (exp2Aux -> empty .)
+    LESS_THAN       reduce using rule 53 (exp2Aux -> empty .)
+    LESS_EQUAL_THAN reduce using rule 53 (exp2Aux -> empty .)
+    NOT_EQUALS      reduce using rule 53 (exp2Aux -> empty .)
+    EQUALS          reduce using rule 53 (exp2Aux -> empty .)
+    AND             reduce using rule 53 (exp2Aux -> empty .)
+    OR              reduce using rule 53 (exp2Aux -> empty .)
+    COMMA           reduce using rule 53 (exp2Aux -> empty .)
+    RIGHT_PAREN     reduce using rule 53 (exp2Aux -> empty .)
+    SEMI_COLON      reduce using rule 53 (exp2Aux -> empty .)
+
+
+state 159
+
+    (54) term -> factor doTerm auxTerm .
+
+    PLUS            reduce using rule 54 (term -> factor doTerm auxTerm .)
+    MINUS           reduce using rule 54 (term -> factor doTerm auxTerm .)
+    GREATER_THAN    reduce using rule 54 (term -> factor doTerm auxTerm .)
+    GREATER_EQUAL_THAN reduce using rule 54 (term -> factor doTerm auxTerm .)
+    LESS_THAN       reduce using rule 54 (term -> factor doTerm auxTerm .)
+    LESS_EQUAL_THAN reduce using rule 54 (term -> factor doTerm auxTerm .)
+    NOT_EQUALS      reduce using rule 54 (term -> factor doTerm auxTerm .)
+    EQUALS          reduce using rule 54 (term -> factor doTerm auxTerm .)
+    AND             reduce using rule 54 (term -> factor doTerm auxTerm .)
+    OR              reduce using rule 54 (term -> factor doTerm auxTerm .)
+    COMMA           reduce using rule 54 (term -> factor doTerm auxTerm .)
+    RIGHT_PAREN     reduce using rule 54 (term -> factor doTerm auxTerm .)
+    SEMI_COLON      reduce using rule 54 (term -> factor doTerm auxTerm .)
+
+
+state 160
+
+    (55) auxTerm -> TIMES . addOperator term
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 185
+
+state 161
+
+    (56) auxTerm -> DIV . addOperator term
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 186
+
+state 162
+
+    (57) auxTerm -> MOD . addOperator term
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 187
+
+state 163
+
+    (58) auxTerm -> EXP . addOperator term
+    (94) addOperator -> .
+
+    LEFT_PAREN      reduce using rule 94 (addOperator -> .)
+    CTE_ID          reduce using rule 94 (addOperator -> .)
+    CTE_INT         reduce using rule 94 (addOperator -> .)
+    CTE_FLOAT       reduce using rule 94 (addOperator -> .)
+    CTE_STRING      reduce using rule 94 (addOperator -> .)
+    TRUE            reduce using rule 94 (addOperator -> .)
+    FALSE           reduce using rule 94 (addOperator -> .)
+
+    addOperator                    shift and go to state 188
+
+state 164
+
+    (59) auxTerm -> empty .
+
+    PLUS            reduce using rule 59 (auxTerm -> empty .)
+    MINUS           reduce using rule 59 (auxTerm -> empty .)
+    GREATER_THAN    reduce using rule 59 (auxTerm -> empty .)
+    GREATER_EQUAL_THAN reduce using rule 59 (auxTerm -> empty .)
+    LESS_THAN       reduce using rule 59 (auxTerm -> empty .)
+    LESS_EQUAL_THAN reduce using rule 59 (auxTerm -> empty .)
+    NOT_EQUALS      reduce using rule 59 (auxTerm -> empty .)
+    EQUALS          reduce using rule 59 (auxTerm -> empty .)
+    AND             reduce using rule 59 (auxTerm -> empty .)
+    OR              reduce using rule 59 (auxTerm -> empty .)
+    COMMA           reduce using rule 59 (auxTerm -> empty .)
+    RIGHT_PAREN     reduce using rule 59 (auxTerm -> empty .)
+    SEMI_COLON      reduce using rule 59 (auxTerm -> empty .)
+
+
+state 165
+
+    (68) if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN . funcBody else endIF
+    (19) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+
+    LEFT_CURLY_BRACKET shift and go to state 53
+
+    funcBody                       shift and go to state 189
+
+state 166
+
+    (72) while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile . RIGHT_PAREN funcBody endWhile
+
+    RIGHT_PAREN     shift and go to state 190
+
+
+state 167
+
+    (74) auxFor -> CTE_ID .
+
+    COMMA           reduce using rule 74 (auxFor -> CTE_ID .)
+    RIGHT_PAREN     reduce using rule 74 (auxFor -> CTE_ID .)
+
+
+state 168
+
+    (73) for -> FOR LEFT_PAREN CTE_ID COMMA auxFor . COMMA auxFor RIGHT_PAREN funcBody
+
+    COMMA           shift and go to state 191
+
+
+state 169
+
+    (75) auxFor -> CTE_INT .
+
+    COMMA           reduce using rule 75 (auxFor -> CTE_INT .)
+    RIGHT_PAREN     reduce using rule 75 (auxFor -> CTE_INT .)
+
+
+state 170
+
+    (15) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID . LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+
+    LEFT_BRACKET    shift and go to state 192
+
+
+state 171
+
+    (13) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . COMMA vars_type_array
+    (14) vars_type_array -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . SEMI_COLON auxVars
+
+    COMMA           shift and go to state 55
+    SEMI_COLON      shift and go to state 56
+
+
+state 172
+
+    (37) assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign . SEMI_COLON
+
+    SEMI_COLON      shift and go to state 193
+
+
+state 173
+
+    (60) factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN . removeParenthesis
+    (96) removeParenthesis -> .
+
+    TIMES           reduce using rule 96 (removeParenthesis -> .)
+    DIV             reduce using rule 96 (removeParenthesis -> .)
+    MOD             reduce using rule 96 (removeParenthesis -> .)
+    EXP             reduce using rule 96 (removeParenthesis -> .)
+    PLUS            reduce using rule 96 (removeParenthesis -> .)
+    MINUS           reduce using rule 96 (removeParenthesis -> .)
+    GREATER_THAN    reduce using rule 96 (removeParenthesis -> .)
+    GREATER_EQUAL_THAN reduce using rule 96 (removeParenthesis -> .)
+    LESS_THAN       reduce using rule 96 (removeParenthesis -> .)
+    LESS_EQUAL_THAN reduce using rule 96 (removeParenthesis -> .)
+    NOT_EQUALS      reduce using rule 96 (removeParenthesis -> .)
+    EQUALS          reduce using rule 96 (removeParenthesis -> .)
+    AND             reduce using rule 96 (removeParenthesis -> .)
+    OR              reduce using rule 96 (removeParenthesis -> .)
+    COMMA           reduce using rule 96 (removeParenthesis -> .)
+    RIGHT_PAREN     reduce using rule 96 (removeParenthesis -> .)
+    SEMI_COLON      reduce using rule 96 (removeParenthesis -> .)
+
+    removeParenthesis              shift and go to state 194
+
+state 174
+
+    (35) multipleWrite -> COMMA auxWritting .
+
+    RIGHT_PAREN     reduce using rule 35 (multipleWrite -> COMMA auxWritting .)
+
+
+state 175
+
+    (39) auxLogicExpression -> AND addOperator . logicExpression
+    (38) logicExpression -> . exp doLogicExpression auxLogicExpression
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    logicExpression                shift and go to state 195
+    exp                            shift and go to state 96
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 176
+
+    (40) auxLogicExpression -> OR addOperator . logicExpression
+    (38) logicExpression -> . exp doLogicExpression auxLogicExpression
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    logicExpression                shift and go to state 196
+    exp                            shift and go to state 96
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 177
+
+    (43) auxExp -> GREATER_THAN addOperator . exp
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    exp                            shift and go to state 197
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 178
+
+    (44) auxExp -> GREATER_EQUAL_THAN addOperator . exp
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    exp                            shift and go to state 198
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 179
+
+    (45) auxExp -> LESS_THAN addOperator . exp
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    exp                            shift and go to state 199
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 180
+
+    (46) auxExp -> LESS_EQUAL_THAN addOperator . exp
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    exp                            shift and go to state 200
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 181
+
+    (47) auxExp -> NOT_EQUALS addOperator . exp
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    exp                            shift and go to state 201
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 182
+
+    (48) auxExp -> EQUALS addOperator . exp
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    exp                            shift and go to state 202
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 183
+
+    (51) exp2Aux -> PLUS addOperator . exp2
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    exp2                           shift and go to state 203
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 184
+
+    (52) exp2Aux -> MINUS addOperator . exp2
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    exp2                           shift and go to state 204
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 185
+
+    (55) auxTerm -> TIMES addOperator . term
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    term                           shift and go to state 205
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 186
+
+    (56) auxTerm -> DIV addOperator . term
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    term                           shift and go to state 206
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 187
+
+    (57) auxTerm -> MOD addOperator . term
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    term                           shift and go to state 207
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 188
+
+    (58) auxTerm -> EXP addOperator . term
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    term                           shift and go to state 208
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 189
+
+    (68) if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody . else endIF
+    (69) else -> . ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF
+    (70) else -> . ELSE doElse funcBody
+    (71) else -> . empty
+    (104) empty -> .
+
+    ELSE            shift and go to state 210
+    VAR             reduce using rule 104 (empty -> .)
+    CTE_ID          reduce using rule 104 (empty -> .)
+    PRINT           reduce using rule 104 (empty -> .)
+    IF              reduce using rule 104 (empty -> .)
+    WHILE           reduce using rule 104 (empty -> .)
+    FOR             reduce using rule 104 (empty -> .)
+    RIGHT_CURLY_BRACKET reduce using rule 104 (empty -> .)
+
+    else                           shift and go to state 209
+    empty                          shift and go to state 211
+
+state 190
+
+    (72) while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN . funcBody endWhile
+    (19) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+
+    LEFT_CURLY_BRACKET shift and go to state 53
+
+    funcBody                       shift and go to state 212
+
+state 191
+
+    (73) for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA . auxFor RIGHT_PAREN funcBody
+    (74) auxFor -> . CTE_ID
+    (75) auxFor -> . CTE_INT
+
+    CTE_ID          shift and go to state 167
+    CTE_INT         shift and go to state 169
+
+    auxFor                         shift and go to state 213
+
+state 192
+
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET . CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+
+    CTE_INT         shift and go to state 214
+
+
+state 193
+
+    (37) assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON .
+
+    VAR             reduce using rule 37 (assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON .)
+    CTE_ID          reduce using rule 37 (assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON .)
+    PRINT           reduce using rule 37 (assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON .)
+    IF              reduce using rule 37 (assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON .)
+    WHILE           reduce using rule 37 (assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON .)
+    FOR             reduce using rule 37 (assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON .)
+    RIGHT_CURLY_BRACKET reduce using rule 37 (assignment -> CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON .)
+
+
+state 194
+
+    (60) factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .
+
+    TIMES           reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    DIV             reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    MOD             reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    EXP             reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    PLUS            reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    MINUS           reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    GREATER_THAN    reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    GREATER_EQUAL_THAN reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    LESS_THAN       reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    LESS_EQUAL_THAN reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    NOT_EQUALS      reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    EQUALS          reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    AND             reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    OR              reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    COMMA           reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    RIGHT_PAREN     reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+    SEMI_COLON      reduce using rule 60 (factor -> LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis .)
+
+
+state 195
+
+    (39) auxLogicExpression -> AND addOperator logicExpression .
+
+    COMMA           reduce using rule 39 (auxLogicExpression -> AND addOperator logicExpression .)
+    RIGHT_PAREN     reduce using rule 39 (auxLogicExpression -> AND addOperator logicExpression .)
+    SEMI_COLON      reduce using rule 39 (auxLogicExpression -> AND addOperator logicExpression .)
+
+
+state 196
+
+    (40) auxLogicExpression -> OR addOperator logicExpression .
+
+    COMMA           reduce using rule 40 (auxLogicExpression -> OR addOperator logicExpression .)
+    RIGHT_PAREN     reduce using rule 40 (auxLogicExpression -> OR addOperator logicExpression .)
+    SEMI_COLON      reduce using rule 40 (auxLogicExpression -> OR addOperator logicExpression .)
+
+
+state 197
+
+    (43) auxExp -> GREATER_THAN addOperator exp .
+
+    AND             reduce using rule 43 (auxExp -> GREATER_THAN addOperator exp .)
+    OR              reduce using rule 43 (auxExp -> GREATER_THAN addOperator exp .)
+    COMMA           reduce using rule 43 (auxExp -> GREATER_THAN addOperator exp .)
+    RIGHT_PAREN     reduce using rule 43 (auxExp -> GREATER_THAN addOperator exp .)
+    SEMI_COLON      reduce using rule 43 (auxExp -> GREATER_THAN addOperator exp .)
+
+
+state 198
+
+    (44) auxExp -> GREATER_EQUAL_THAN addOperator exp .
+
+    AND             reduce using rule 44 (auxExp -> GREATER_EQUAL_THAN addOperator exp .)
+    OR              reduce using rule 44 (auxExp -> GREATER_EQUAL_THAN addOperator exp .)
+    COMMA           reduce using rule 44 (auxExp -> GREATER_EQUAL_THAN addOperator exp .)
+    RIGHT_PAREN     reduce using rule 44 (auxExp -> GREATER_EQUAL_THAN addOperator exp .)
+    SEMI_COLON      reduce using rule 44 (auxExp -> GREATER_EQUAL_THAN addOperator exp .)
+
+
+state 199
+
+    (45) auxExp -> LESS_THAN addOperator exp .
+
+    AND             reduce using rule 45 (auxExp -> LESS_THAN addOperator exp .)
+    OR              reduce using rule 45 (auxExp -> LESS_THAN addOperator exp .)
+    COMMA           reduce using rule 45 (auxExp -> LESS_THAN addOperator exp .)
+    RIGHT_PAREN     reduce using rule 45 (auxExp -> LESS_THAN addOperator exp .)
+    SEMI_COLON      reduce using rule 45 (auxExp -> LESS_THAN addOperator exp .)
+
+
+state 200
+
+    (46) auxExp -> LESS_EQUAL_THAN addOperator exp .
+
+    AND             reduce using rule 46 (auxExp -> LESS_EQUAL_THAN addOperator exp .)
+    OR              reduce using rule 46 (auxExp -> LESS_EQUAL_THAN addOperator exp .)
+    COMMA           reduce using rule 46 (auxExp -> LESS_EQUAL_THAN addOperator exp .)
+    RIGHT_PAREN     reduce using rule 46 (auxExp -> LESS_EQUAL_THAN addOperator exp .)
+    SEMI_COLON      reduce using rule 46 (auxExp -> LESS_EQUAL_THAN addOperator exp .)
+
+
+state 201
+
+    (47) auxExp -> NOT_EQUALS addOperator exp .
+
+    AND             reduce using rule 47 (auxExp -> NOT_EQUALS addOperator exp .)
+    OR              reduce using rule 47 (auxExp -> NOT_EQUALS addOperator exp .)
+    COMMA           reduce using rule 47 (auxExp -> NOT_EQUALS addOperator exp .)
+    RIGHT_PAREN     reduce using rule 47 (auxExp -> NOT_EQUALS addOperator exp .)
+    SEMI_COLON      reduce using rule 47 (auxExp -> NOT_EQUALS addOperator exp .)
+
+
+state 202
+
+    (48) auxExp -> EQUALS addOperator exp .
+
+    AND             reduce using rule 48 (auxExp -> EQUALS addOperator exp .)
+    OR              reduce using rule 48 (auxExp -> EQUALS addOperator exp .)
+    COMMA           reduce using rule 48 (auxExp -> EQUALS addOperator exp .)
+    RIGHT_PAREN     reduce using rule 48 (auxExp -> EQUALS addOperator exp .)
+    SEMI_COLON      reduce using rule 48 (auxExp -> EQUALS addOperator exp .)
+
+
+state 203
+
+    (51) exp2Aux -> PLUS addOperator exp2 .
+
+    GREATER_THAN    reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    GREATER_EQUAL_THAN reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    LESS_THAN       reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    LESS_EQUAL_THAN reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    NOT_EQUALS      reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    EQUALS          reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    AND             reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    OR              reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    COMMA           reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    RIGHT_PAREN     reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+    SEMI_COLON      reduce using rule 51 (exp2Aux -> PLUS addOperator exp2 .)
+
+
+state 204
+
+    (52) exp2Aux -> MINUS addOperator exp2 .
+
+    GREATER_THAN    reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    GREATER_EQUAL_THAN reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    LESS_THAN       reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    LESS_EQUAL_THAN reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    NOT_EQUALS      reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    EQUALS          reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    AND             reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    OR              reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    COMMA           reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    RIGHT_PAREN     reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+    SEMI_COLON      reduce using rule 52 (exp2Aux -> MINUS addOperator exp2 .)
+
+
+state 205
+
+    (55) auxTerm -> TIMES addOperator term .
+
+    PLUS            reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    MINUS           reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    GREATER_THAN    reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    GREATER_EQUAL_THAN reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    LESS_THAN       reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    LESS_EQUAL_THAN reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    NOT_EQUALS      reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    EQUALS          reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    AND             reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    OR              reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    COMMA           reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    RIGHT_PAREN     reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+    SEMI_COLON      reduce using rule 55 (auxTerm -> TIMES addOperator term .)
+
+
+state 206
+
+    (56) auxTerm -> DIV addOperator term .
+
+    PLUS            reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    MINUS           reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    GREATER_THAN    reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    GREATER_EQUAL_THAN reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    LESS_THAN       reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    LESS_EQUAL_THAN reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    NOT_EQUALS      reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    EQUALS          reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    AND             reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    OR              reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    COMMA           reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    RIGHT_PAREN     reduce using rule 56 (auxTerm -> DIV addOperator term .)
+    SEMI_COLON      reduce using rule 56 (auxTerm -> DIV addOperator term .)
+
+
+state 207
+
+    (57) auxTerm -> MOD addOperator term .
+
+    PLUS            reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    MINUS           reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    GREATER_THAN    reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    GREATER_EQUAL_THAN reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    LESS_THAN       reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    LESS_EQUAL_THAN reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    NOT_EQUALS      reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    EQUALS          reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    AND             reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    OR              reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    COMMA           reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    RIGHT_PAREN     reduce using rule 57 (auxTerm -> MOD addOperator term .)
+    SEMI_COLON      reduce using rule 57 (auxTerm -> MOD addOperator term .)
+
+
+state 208
+
+    (58) auxTerm -> EXP addOperator term .
+
+    PLUS            reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    MINUS           reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    GREATER_THAN    reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    GREATER_EQUAL_THAN reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    LESS_THAN       reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    LESS_EQUAL_THAN reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    NOT_EQUALS      reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    EQUALS          reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    AND             reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    OR              reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    COMMA           reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    RIGHT_PAREN     reduce using rule 58 (auxTerm -> EXP addOperator term .)
+    SEMI_COLON      reduce using rule 58 (auxTerm -> EXP addOperator term .)
+
+
+state 209
+
+    (68) if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else . endIF
+    (84) endIF -> .
+
+    VAR             reduce using rule 84 (endIF -> .)
+    CTE_ID          reduce using rule 84 (endIF -> .)
+    PRINT           reduce using rule 84 (endIF -> .)
+    IF              reduce using rule 84 (endIF -> .)
+    WHILE           reduce using rule 84 (endIF -> .)
+    FOR             reduce using rule 84 (endIF -> .)
+    RIGHT_CURLY_BRACKET reduce using rule 84 (endIF -> .)
+
+    endIF                          shift and go to state 215
+
+state 210
+
+    (69) else -> ELSE . doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF
+    (70) else -> ELSE . doElse funcBody
+    (85) doElse -> .
+
+    IF              reduce using rule 85 (doElse -> .)
+    LEFT_CURLY_BRACKET reduce using rule 85 (doElse -> .)
+
+    doElse                         shift and go to state 216
+
+state 211
+
+    (71) else -> empty .
+
+    VAR             reduce using rule 71 (else -> empty .)
+    CTE_ID          reduce using rule 71 (else -> empty .)
+    PRINT           reduce using rule 71 (else -> empty .)
+    IF              reduce using rule 71 (else -> empty .)
+    WHILE           reduce using rule 71 (else -> empty .)
+    FOR             reduce using rule 71 (else -> empty .)
+    RIGHT_CURLY_BRACKET reduce using rule 71 (else -> empty .)
+
+
+state 212
+
+    (72) while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody . endWhile
+    (87) endWhile -> .
+
+    VAR             reduce using rule 87 (endWhile -> .)
+    CTE_ID          reduce using rule 87 (endWhile -> .)
+    PRINT           reduce using rule 87 (endWhile -> .)
+    IF              reduce using rule 87 (endWhile -> .)
+    WHILE           reduce using rule 87 (endWhile -> .)
+    FOR             reduce using rule 87 (endWhile -> .)
+    RIGHT_CURLY_BRACKET reduce using rule 87 (endWhile -> .)
+
+    endWhile                       shift and go to state 217
+
+state 213
+
+    (73) for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor . RIGHT_PAREN funcBody
+
+    RIGHT_PAREN     shift and go to state 218
+
+
+state 214
+
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT . RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+
+    RIGHT_BRACKET   shift and go to state 219
+
+
+state 215
+
+    (68) if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF .
+
+    VAR             reduce using rule 68 (if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF .)
+    CTE_ID          reduce using rule 68 (if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF .)
+    PRINT           reduce using rule 68 (if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF .)
+    IF              reduce using rule 68 (if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF .)
+    WHILE           reduce using rule 68 (if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF .)
+    FOR             reduce using rule 68 (if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF .)
+    RIGHT_CURLY_BRACKET reduce using rule 68 (if -> IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF .)
+
+
+state 216
+
+    (69) else -> ELSE doElse . IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF
+    (70) else -> ELSE doElse . funcBody
+    (19) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+
+    IF              shift and go to state 220
+    LEFT_CURLY_BRACKET shift and go to state 53
+
+    funcBody                       shift and go to state 221
+
+state 217
+
+    (72) while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile .
+
+    VAR             reduce using rule 72 (while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile .)
+    CTE_ID          reduce using rule 72 (while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile .)
+    PRINT           reduce using rule 72 (while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile .)
+    IF              reduce using rule 72 (while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile .)
+    WHILE           reduce using rule 72 (while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile .)
+    FOR             reduce using rule 72 (while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile .)
+    RIGHT_CURLY_BRACKET reduce using rule 72 (while -> WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile .)
+
+
+state 218
+
+    (73) for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN . funcBody
+    (19) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+
+    LEFT_CURLY_BRACKET shift and go to state 53
+
+    funcBody                       shift and go to state 222
+
+state 219
+
+    (15) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
+    (16) vars_type_matrix -> CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET . LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+
+    LEFT_BRACKET    shift and go to state 54
+
+
+state 220
+
+    (69) else -> ELSE doElse IF . LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF
+
+    LEFT_PAREN      shift and go to state 223
+
+
+state 221
+
+    (70) else -> ELSE doElse funcBody .
+
+    VAR             reduce using rule 70 (else -> ELSE doElse funcBody .)
+    CTE_ID          reduce using rule 70 (else -> ELSE doElse funcBody .)
+    PRINT           reduce using rule 70 (else -> ELSE doElse funcBody .)
+    IF              reduce using rule 70 (else -> ELSE doElse funcBody .)
+    WHILE           reduce using rule 70 (else -> ELSE doElse funcBody .)
+    FOR             reduce using rule 70 (else -> ELSE doElse funcBody .)
+    RIGHT_CURLY_BRACKET reduce using rule 70 (else -> ELSE doElse funcBody .)
+
+
+state 222
+
+    (73) for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody .
+
+    VAR             reduce using rule 73 (for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody .)
+    CTE_ID          reduce using rule 73 (for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody .)
+    PRINT           reduce using rule 73 (for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody .)
+    IF              reduce using rule 73 (for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody .)
+    WHILE           reduce using rule 73 (for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody .)
+    FOR             reduce using rule 73 (for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody .)
+    RIGHT_CURLY_BRACKET reduce using rule 73 (for -> FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody .)
+
+
+state 223
+
+    (69) else -> ELSE doElse IF LEFT_PAREN . logicExpression doIF RIGHT_PAREN funcBody endIF
+    (38) logicExpression -> . exp doLogicExpression auxLogicExpression
+    (42) exp -> . exp2 doCompExpression auxExp
+    (50) exp2 -> . term doExpression exp2Aux
+    (54) term -> . factor doTerm auxTerm
+    (60) factor -> . LEFT_PAREN addParenthesis logicExpression RIGHT_PAREN removeParenthesis
+    (61) factor -> . constants
+    (62) constants -> . CTE_ID addOperand
+    (63) constants -> . CTE_INT addConstantOperand
+    (64) constants -> . CTE_FLOAT addConstantOperand
+    (65) constants -> . CTE_STRING addConstantOperand
+    (66) constants -> . TRUE addConstantBool
+    (67) constants -> . FALSE addConstantBool
+
+    LEFT_PAREN      shift and go to state 92
+    CTE_ID          shift and go to state 101
+    CTE_INT         shift and go to state 102
+    CTE_FLOAT       shift and go to state 103
+    CTE_STRING      shift and go to state 107
+    TRUE            shift and go to state 104
+    FALSE           shift and go to state 105
+
+    logicExpression                shift and go to state 224
+    exp                            shift and go to state 96
+    exp2                           shift and go to state 97
+    term                           shift and go to state 98
+    factor                         shift and go to state 99
+    constants                      shift and go to state 100
+
+state 224
+
+    (69) else -> ELSE doElse IF LEFT_PAREN logicExpression . doIF RIGHT_PAREN funcBody endIF
+    (83) doIF -> .
+
+    RIGHT_PAREN     reduce using rule 83 (doIF -> .)
+
+    doIF                           shift and go to state 225
+
+state 225
+
+    (69) else -> ELSE doElse IF LEFT_PAREN logicExpression doIF . RIGHT_PAREN funcBody endIF
+
+    RIGHT_PAREN     shift and go to state 226
+
+
+state 226
+
+    (69) else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN . funcBody endIF
+    (19) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
+
+    LEFT_CURLY_BRACKET shift and go to state 53
+
+    funcBody                       shift and go to state 227
+
+state 227
+
+    (69) else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody . endIF
+    (84) endIF -> .
+
+    VAR             reduce using rule 84 (endIF -> .)
+    CTE_ID          reduce using rule 84 (endIF -> .)
+    PRINT           reduce using rule 84 (endIF -> .)
+    IF              reduce using rule 84 (endIF -> .)
+    WHILE           reduce using rule 84 (endIF -> .)
+    FOR             reduce using rule 84 (endIF -> .)
+    RIGHT_CURLY_BRACKET reduce using rule 84 (endIF -> .)
+
+    endIF                          shift and go to state 228
+
+state 228
+
+    (69) else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF .
+
+    VAR             reduce using rule 69 (else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF .)
+    CTE_ID          reduce using rule 69 (else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF .)
+    PRINT           reduce using rule 69 (else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF .)
+    IF              reduce using rule 69 (else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF .)
+    WHILE           reduce using rule 69 (else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF .)
+    FOR             reduce using rule 69 (else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF .)
+    RIGHT_CURLY_BRACKET reduce using rule 69 (else -> ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF .)
 
 WARNING: 
 WARNING: Conflicts:
 WARNING: 
+WARNING: shift/reduce conflict for CTE_ID in state 53 resolved as shift
+WARNING: shift/reduce conflict for PRINT in state 53 resolved as shift
+WARNING: shift/reduce conflict for IF in state 53 resolved as shift
+WARNING: shift/reduce conflict for WHILE in state 53 resolved as shift
+WARNING: shift/reduce conflict for FOR in state 53 resolved as shift
+WARNING: shift/reduce conflict for CTE_ID in state 61 resolved as shift
+WARNING: shift/reduce conflict for PRINT in state 61 resolved as shift
+WARNING: shift/reduce conflict for IF in state 61 resolved as shift
+WARNING: shift/reduce conflict for WHILE in state 61 resolved as shift
+WARNING: shift/reduce conflict for FOR in state 61 resolved as shift
+WARNING: shift/reduce conflict for CTE_ID in state 80 resolved as shift
+WARNING: shift/reduce conflict for PRINT in state 80 resolved as shift
+WARNING: shift/reduce conflict for IF in state 80 resolved as shift
+WARNING: shift/reduce conflict for WHILE in state 80 resolved as shift
+WARNING: shift/reduce conflict for FOR in state 80 resolved as shift
 WARNING: reduce/reduce conflict in state 8 resolved using rule (globalVariables -> empty)
-WARNING: rejected rule (vars -> empty) in state 8
+WARNING: rejected rule (auxVars -> empty) in state 8
+WARNING: reduce/reduce conflict in state 95 resolved using rule (addConstantOperand -> <empty>)
+WARNING: rejected rule (doWriteString -> <empty>) in state 95
+WARNING: Rule (doWriteString -> <empty>) is never reduced
