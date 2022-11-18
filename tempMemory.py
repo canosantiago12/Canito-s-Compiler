@@ -1,4 +1,5 @@
 import sys
+from collections import deque
 
 class temporalMemory():
     def __init__(self) -> None:
@@ -7,6 +8,15 @@ class temporalMemory():
         self.tempBool = 15000
         self.tempString = 16000
         self.tempPointer = 17000
+
+        self.temp_ints = []
+        self.temp_ints_s = deque()
+        self.temp_floats = []
+        self.temp_floats_s = deque()
+        self.temp_bools = []
+        self.temp_bools_s = deque()
+        self.temp_strings = []
+        self.temp_strings_s = deque()
 
     def malloc(self, tempType, size):
         if tempType == 'int':
@@ -44,6 +54,23 @@ class temporalMemory():
             else:
                 print('Ran out of memory! :(')
                 sys.exit()
+
+    def reset(self):
+        self.temp_ints_s.append(self.temp_ints)
+        self.temp_ints = []
+        self.temp_floats_s.append(self.temp_floats)
+        self.temp_floats = []
+        self.temp_bools_s.append(self.temp_bools)
+        self.temp_bools = []
+        self.temp_strings_s.append(self.temp_strings)
+        self.temp_strings = []
+
+    def free(self):
+        self.tempInt = 13000
+        self.tempFloat = 14000
+        self.tempBool = 15000
+        self.tempString = 16000
+        self.tempPointer = 17000
         
     def __str__(self):
         return f'Current const pos (int/float/bool/string): {self.tempInt} {self.tempFloat} {self.tempBool} {self.tempString}'

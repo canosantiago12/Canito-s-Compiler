@@ -7,6 +7,11 @@ class constantMemory():
         self.constantBool = 11000
         self.constantString = 12000
 
+        self.const_ints = []
+        self.const_floats = []
+        self.const_bools = []
+        self.const_strings = []
+
     def malloc(self, consType, size):
         if consType == 'int':
             if self.constantInt > 8999 and self.constantInt < 10000:

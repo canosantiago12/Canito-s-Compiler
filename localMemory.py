@@ -1,4 +1,5 @@
 import sys
+from collections import deque
 
 class localMemory():
     def __init__(self) -> None:
@@ -6,6 +7,15 @@ class localMemory():
         self.localFloat = 6000
         self.localBool = 7000
         self.localString = 8000
+
+        self.local_ints = []
+        self.local_ints_s = deque()
+        self.local_floats = []
+        self.local_floats_s = deque()
+        self.local_bools = []
+        self.local_bools_s = deque()
+        self.local_strings = []
+        self.local_strings_s = deque()
 
     def malloc(self, localType, size):
         if localType == 'int':
@@ -36,6 +46,22 @@ class localMemory():
             else:
                 print('Ran out of memory! :(')
                 sys.exit()
+
+    def reset(self):
+        self.local_ints_s.append(self.local_ints)
+        self.local_ints = []
+        self.local_floats_s.append(self.local_floats)
+        self.local_floats = []
+        self.local_bools_s.append(self.local_bools)
+        self.local_bools = []
+        self.local_strings_s.append(self.local_strings)
+        self.local_strings = []
+
+    def free(self):
+        self.localInt = 5000
+        self.localFloat = 6000
+        self.localBool = 7000
+        self.localString = 8000
 
     def __str__(self):
         return f'Current local pos (int/float/bool/string): {self.localInt} {self.localFloat} {self.localBool} {self.localString}'
