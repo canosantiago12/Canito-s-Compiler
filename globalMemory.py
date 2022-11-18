@@ -7,6 +7,11 @@ class globalMemory():
         self.globalBool = 3000
         self.globalString = 4000
 
+        self.global_ints = []
+        self.global_floats = []
+        self.global_bools = []
+        self.global_strings = []
+
     def malloc(self, globalType, size):
         if globalType == 'int':
             if self.globalInt > 999 and self.globalInt < 2000:

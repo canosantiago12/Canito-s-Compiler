@@ -3,8 +3,8 @@ import ply.lex as lex
 
 # Tokens
 tokens = ('IF', 'ELSE', 'FOR', 'WHILE', 
-        'FUNC', 'RETURN', 'MAIN', 'BTSProgam',
-        'VAR', 'INT', 'FLOAT', 'BOOL', 'VOID', 'STRING', 'TRUE', 'FALSE', 'CTE_INT', 'CTE_FLOAT', 'CTE_BOOL', 'CTE_ID', 'CTE_STRING',
+        'FUNC', 'RETURN', 'RETURN_SIGN', 'MAIN', 'BTSProgam',
+        'VAR', 'INT', 'FLOAT', 'BOOL', 'STRING', 'TRUE', 'FALSE', 'CTE_INT', 'CTE_FLOAT', 'CTE_ID', 'CTE_STRING',
         'PLUS', 'MINUS', 'TIMES', 'DIV', 'MOD', 'EXP', 'EQUAL', 'LESS_THAN', 'LESS_EQUAL_THAN', 'GREATER_THAN', 'GREATER_EQUAL_THAN', 'EQUALS', 'NOT_EQUALS', 'AND', 'OR',
         'LEFT_PAREN', 'RIGHT_PAREN', 'LEFT_BRACKET', 'RIGHT_BRACKET', 'LEFT_CURLY_BRACKET', 'RIGHT_CURLY_BRACKET', 'COMMA', 'SEMI_COLON',
         'MEAN', 'MEDIAN', 'MODE', 'STANDARD_DEVIATION', 'VARIANCE', 'POISSON', 'BINOMIAL', 'PLOT', 'PRINT', 'READ_INPUT'
@@ -26,8 +26,7 @@ reserved = {
     'string': 'STRING',
     'true': 'TRUE',
     'false': 'FALSE',
-    'void': 'VOID',
-    'readInput' : 'READ_INPUT',
+    'listen' : 'READ_INPUT',
     'print' : 'PRINT'
 }
 
@@ -63,6 +62,7 @@ t_SEMI_COLON = r'\;'
 t_ignore = " \t"
 
 t_CTE_STRING = r'"(.*?)"'
+t_RETURN_SIGN = r'\-\>'
 # t_CTE_STRING = r"""\"(.*)\"|\'(.*)\'"""
 t_BTSProgam = "BTSProgam"
 

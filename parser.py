@@ -100,7 +100,25 @@ def p_funcs(p):
 
 def p_funcs_aux(p):
     '''
-    funcs_aux : FUNC type CTE_ID saveFuncID LEFT_PAREN RIGHT_PAREN funcBody addMemoryInfo endFunction
+    funcs_aux : FUNC type CTE_ID saveFuncID LEFT_PAREN params RIGHT_PAREN funcBody addMemoryInfo endFunction
+              | FUNC CTE_ID saveFuncID LEFT_PAREN params RIGHT_PAREN funcBody addMemoryInfo endFunction
+    '''
+
+def p_params(p):
+    '''
+    params : auxParams
+          | empty
+    '''
+
+def p_auxParams(p):
+    '''
+    auxParams : type CTE_ID multipleParams
+    '''
+
+def p_multipleParams(p):
+    '''
+    multipleParams : COMMA auxParams
+                   | empty
     '''
 
 def p_funcBody(p):
@@ -122,10 +140,16 @@ def p_auxFuncBody(p):
 #     '''
 
 # Function return Rules
-# def p_return(p):
-#     '''
-#     return : RETURN LEFT_PAREN RIGHT_PAREN SEMI_COLON
-#     '''
+def p_return(p):
+    '''
+    return : RETURN RETURN_SIGN LEFT_PAREN auxReturn RIGHT_PAREN SEMI_COLON
+    '''
+
+def p_auxReturn(p):
+    '''
+    auxReturn : logicExpression
+              | empty
+    '''
 
 # Variables type Rules
 def p_type(p):
@@ -141,9 +165,10 @@ def p_statements(p):
     '''
     statements : assignment
                | writting
+               | reading
                | if
                | while
-               | for
+               | return
     '''
 
 # Writting Rules
@@ -165,10 +190,21 @@ def p_multipleWrite(p):
     '''
 
 # Reading Rules
-# def p_reading(p):
-#     '''
-#     reading : READ_INPUT addOperator LEFT_PAREN CTE_ID addOperand doReading RIGHT_PAREN SEMI_COLON
-#     '''
+def p_reading(p):
+    '''
+    reading : READ_INPUT addOperator LEFT_PAREN auxReading RIGHT_PAREN SEMI_COLON
+    '''
+
+def p_auxReading(p):
+    '''
+    auxReading : CTE_ID addOperand doReading multipleRead
+    '''
+
+def p_multipleRead(p):
+    '''
+    multipleRead : COMMA auxReading
+                 | empty
+    '''
 
 # Assing Rules
 def p_assignment(p):
@@ -278,11 +314,6 @@ def p_auxFor(p):
            | CTE_INT
     '''
 
-# Read Rules
-#def p_reading(p):
-   # '''
-   # reading : READ_INPUT LEFT_PAREN RIGHT_PAREN SEMI_COLON
-   # '''
 #==== AUX FUNCS ====#
 def addTemp(type):
     global auxTemps
@@ -306,7 +337,7 @@ def p_startup(p):
 
     programID = p[-1]
     funcID = programID
-    variablesTable[programID] = {'type' : 'void', 'vars' : {}, 'start' : quadsCont, 'numVars' : [], 'numTemps' : []}
+    variablesTable[programID] = {'type' : '', 'vars' : {}, 'start' : quadsCont, 'numVars' : [], 'numTemps' : []}
     newQuad = Quadruple('GOTO', None, None, 'mainStage')
     quadruplesList.append(newQuad)
     quadsCont += 1
@@ -330,17 +361,16 @@ def p_endPrint(p):
     for key, value in variablesTable.items():
         print(key, ' : ', value)
 
+    print("CONS TABLE", constantsTable)
+
     for x in quadruplesList:
         print(cont, x)
         cont += 1
 
-    print(constantsTable)
-    print(lMemory)
-
-    print(f"OPERATOR STACK = {operatorStack}")
-    print(f"OPERAND STACK = {operandsStack}")
-    print(f"TYPE STACK = {typesStack}")
-    print(f"JUMPS STACK = {jumpsStack}")
+    # print(f"OPERATOR STACK = {operatorStack}")
+    # print(f"OPERAND STACK = {operandsStack}")
+    # print(f"TYPE STACK = {typesStack}")
+    # print(f"JUMPS STACK = {jumpsStack}")
 
 def p_saveFuncID(p):
     'saveFuncID :'
@@ -351,6 +381,10 @@ def p_saveFuncID(p):
     funcID = p[-1]
     if(funcID not in variablesTable):
         variablesTable[funcID] = {'type': currType, 'vars': {}, 'start' : quadsCont, 'numVars' : [0, 0, 0, 0], 'numTemps' : [0, 0, 0, 0, 0]}
+        # if(funcID != 'mainStage'):
+        #     variablesTable[funcID] = {'type': currType, 'vars': {}, 'start' : quadsCont, 'numVars' : [0, 0, 0, 0], 'numTemps' : [0, 0, 0, 0, 0]}
+        # else:
+        #     variablesTable[funcID] = {'type': 'void', 'vars': {}, 'start' : quadsCont, 'numVars' : [0, 0, 0, 0], 'numTemps' : [0, 0, 0, 0, 0]}
     else:
         print(f'Function \'{funcID}\' has already been declared!')
         sys.exit()
@@ -365,13 +399,16 @@ def p_addMemoryInfo(p):
 
 def p_endFunction(p):
     'endFunction :'
-    global quadruplesList, variablesTable, quadsCont
+    global quadruplesList, variablesTable, quadsCont, currType
 
     if(funcID != 'mainStage'):
         newQuad = Quadruple('ENDPROC', None, None, None)
         quadruplesList.append(newQuad)
         quadsCont += 1
     variablesTable[funcID]['numTemps'] = auxTemps
+    currType = ''
+    tMemory.free()
+    lMemory.free()
 
 # Conditionals (IF)
 def p_doIF(p):
@@ -557,7 +594,7 @@ def p_doLogicExpression(p):
             leftType = typesStack.pop()
 
             if semanticCube[leftType][rightType][operator] == 'error':
-                print('ERROR')
+                print(f'Cannot perform operation {operator} with: [ {leftType}] and [ {rightType} ] !!!')
                 sys.exit()
             else:
                 resType = semanticCube[leftType][rightType][operator]
@@ -584,7 +621,7 @@ def p_doCompExpression(p):
             leftType = typesStack.pop()
 
             if semanticCube[leftType][rightType][operator] == 'error':
-                print('ERROR')
+                print(f'Cannot perform operation {operator} with: [ {leftType}] and [ {rightType} ] !!!')
                 sys.exit()
             else:
                 resType = semanticCube[leftType][rightType][operator]
@@ -611,7 +648,7 @@ def p_doExpression(p):
             leftType = typesStack.pop()
 
             if semanticCube[leftType][rightType][operator] == 'error':
-                print('ERROR')
+                print(f'Cannot perform operation {operator} with: [ {leftType}] and [ {rightType} ] !!!')
                 sys.exit()
             else:
                 resType = semanticCube[leftType][rightType][operator]
@@ -638,7 +675,7 @@ def p_doTerm(p):
             leftType = typesStack.pop()
 
             if semanticCube[leftType][rightType][operator] == 'error':
-                print('ERROR')
+                print(f'Cannot perform operation {operator} with: [ {leftType}] and [ {rightType} ] !!!')
                 sys.exit()
             else:
                 resType = semanticCube[leftType][rightType][operator]
@@ -662,7 +699,7 @@ def p_doAssign(p):
     leftType = typesStack.pop()
 
     if leftType != rightType:
-        print(f'Type missmatch: {rightOperand} with {leftOperand}')
+        print(f'Type mismatch: [ {leftType} ] with [ {rightType} ] !!!')
         sys.exit()
     else:
         newQuad = Quadruple(operator, rightOperand, None, leftOperand)
@@ -690,12 +727,15 @@ def p_doWriteString(p):
     quadsCont += 1
 
 # Reading
-# def p_doReading(p):
-#     'doReading :'
-#     global operandsStack, operatorStack, quadruplesList, typesStack
+def p_doReading(p):
+    'doReading :'
+    global operandsStack, operatorStack, quadruplesList, typesStack, quadsCont
 
-#     operator = operatorStack.pop()
-#     opera
+    operand = operandsStack.pop()
+    typesStack.pop()
+    newQuad = Quadruple('listen', None, None, operand)
+    quadruplesList.append(newQuad)
+    quadsCont += 1
 
 # Error handling
 def p_error(p):
@@ -721,6 +761,6 @@ if __name__ == '__main__':
     parser.parse(inputCode)
 
 vm = virtualMachine(programID, quadruplesList, variablesTable, constantsTable, auxTemps)
-vm.loadMemory(cMemory, tMemory, gMemory, lMemory)
+vm.loadMemory(gMemory, lMemory, cMemory, tMemory)
 
 vm.exec()
