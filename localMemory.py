@@ -63,5 +63,22 @@ class localMemory():
         self.localBool = 7000
         self.localString = 8000
 
+    def load(self, variablesTable, currFunc, params):
+        # Loading Local Memory For Main Function
+        for i in range(0, variablesTable[currFunc]['numVars'][0] + params[0]):
+            self.local_ints.append(None)
+        for i in range(0, variablesTable[currFunc]['numVars'][1] + params[1]):
+            self.local_floats.append(None)
+        for i in range(0, variablesTable[currFunc]['numVars'][2] + params[2]):
+            self.local_bools.append(None)
+        for i in range(0, variablesTable[currFunc]['numVars'][3] + params[3]):
+            self.local_strings.append(None)
+
+    def delete(self):
+        self.local_ints_s.pop()
+        self.local_floats_s.pop()
+        self.local_bools_s.pop()
+        self.local_strings_s.pop()
+
     def __str__(self):
         return f'Current local pos (int/float/bool/string): {self.localInt} {self.localFloat} {self.localBool} {self.localString}'

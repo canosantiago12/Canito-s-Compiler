@@ -1,4 +1,7 @@
 import sys
+import re
+
+from collections import deque
 
 class virtualMachine():
     def __init__(self, programID, quadruplesList, variablesTable, constantsTable, numTemps) -> None:
@@ -8,7 +11,6 @@ class virtualMachine():
         self.constansTable = constantsTable
         self.numTemps = numTemps
         self.currFunc = 'mainStage'
-        self.quadCont = 0
 
     def __str__(self) -> str:
         return f'Progran Name: {self.programID}\nNum of quadruples: {len(self.quadruplesList)}'
@@ -42,19 +44,7 @@ class virtualMachine():
                 elif el == 'string':
                     self.cMemory.const_strings.append(x)
 
-        # Initializing Temp Memory
-        # Int Temp Memory (First Value)
-        for i in range(0, self.numTemps[0]):
-            self.tMemory.temp_ints.append(None)
-        # Float Temp Memory (Second Value) 
-        for i in range(0, self.numTemps[1]):
-            self.tMemory.temp_floats.append(None)
-        # Bool Temp Memory (Third Value)
-        for i in range(0, self.numTemps[2]):
-            self.tMemory.temp_bools.append(None)
-        # Strings Temp Memory (Fourth Value)
-        for i in range(0, self.numTemps[3]):
-            self.tMemory.temp_strings.append(None)
+        self.tMemory.load(self.variablesTable, self.currFunc)
         self.tMemory.reset()
 
     def getVarID(self, pos, isGlobal):
@@ -161,30 +151,95 @@ class virtualMachine():
             return self.tMemory.temp_strings_s[-1][pos - 16000]
 
     def exec(self):
-        # Loading Local Memory For Main Function
-        for i in range(0, self.variablesTable[self.currFunc]['numVars'][0]):
-            self.lMemory.local_ints.append(None)
-        for i in range(0, self.variablesTable[self.currFunc]['numVars'][1]):
-            self.lMemory.local_floats.append(None)
-        for i in range(0, self.variablesTable[self.currFunc]['numVars'][2]):
-            self.lMemory.local_bools.append(None)
-        for i in range(0, self.variablesTable[self.currFunc]['numVars'][3]):
-            self.lMemory.local_strings.append(None)
+        quadCont = 0
+        pending_s = deque()
+        params_s = deque()
+        funcs_s = deque()
+        self.lMemory.load(self.variablesTable, self.currFunc, [0, 0, 0, 0])
         self.lMemory.reset()
 
-        while(self.quadCont < len(self.quadruplesList)):
-            oper = self.quadruplesList[self.quadCont].operator
-            operand1 = self.quadruplesList[self.quadCont].operand1
-            operand2 = self.quadruplesList[self.quadCont].operand2
-            temp = self.quadruplesList[self.quadCont].temp
+        while(quadCont < len(self.quadruplesList)):
+            oper = self.quadruplesList[quadCont].operator
+            operand1 = self.quadruplesList[quadCont].operand1
+            operand2 = self.quadruplesList[quadCont].operand2
+            temp = self.quadruplesList[quadCont].temp
 
             if(oper == 'GOTO'):
-                self.quadCont = temp
+                quadCont = temp
                 continue
             elif(oper == 'GOTOF'):
                 if(self.getValue(operand1) == False):
-                    self.quadCont = temp
+                    quadCont = temp
                     continue
+            elif(oper == 'ERA'):
+                self.currFunc = temp
+                aux = []
+                funcs_s.append(self.currFunc)
+                auxParams = [self.variablesTable[self.currFunc]['numParams'][0], self.variablesTable[self.currFunc]['numParams'][1], self.variablesTable[self.currFunc]['numParams'][2], self.variablesTable[self.currFunc]['numParams'][3]]
+                self.lMemory.load(self.variablesTable, self.currFunc, auxParams)
+                self.tMemory.load(self.variablesTable, self.currFunc)
+
+                for key, value in self.variablesTable[self.currFunc]['vars'].items():
+                    aux.append(key)
+                params_s.append(aux)
+            elif(oper == 'GOSUB'):
+                jump = self.currFunc
+                self.lMemory.reset()
+                self.tMemory.reset()
+                for key, value in self.variablesTable.items():
+                    if(value['start'] == temp):
+                        jump = key
+                        continue
+                self.currFunc = jump
+                pending_s.append(quadCont)
+                quadCont = temp
+                continue
+            elif(oper == 'PARAM'):
+                aux2 = re.findall(r'\d+', temp)
+                if(len(params_s[-1]) > 0):
+                    if((1000 <= operand1 < 2000) or (5000 <= operand1 < 6000) or (9000 <= operand1 < 10000) or (13000 <= operand1 < 14000)):
+                        self.lMemory.local_ints[self.variablesTable[self.currFunc]['vars'][params_s[-1][int(aux2[0])]]['memoryPos'] - 5000] = self.getValue(operand1)
+                    if((2000 <= operand1 < 3000) or (6000 <= operand1 < 7000) or (10000 <= operand1 < 11000) or (14000 <= operand1 < 15000)):
+                        self.lMemory.local_floats[self.variablesTable[self.currFunc]['vars'][params_s[-1][int(aux2[0])]]['memoryPos'] - 6000] = self.getValue(operand1)
+                    if((3000 <= operand1 < 4000) or (7000 <= operand1 < 8000) or (11000 <= operand1 < 12000) or (15000 <= operand1 < 16000)):
+                        self.lMemory.local_bools[self.variablesTable[self.currFunc]['vars'][params_s[-1][int(aux2[0])]]['memoryPos'] - 7000] = self.getValue(operand1)
+                    if((4000 <= operand1 < 5000) or (8000 <= operand1 < 9000) or (12000 <= operand1 < 13000) or (16000 <= operand1 < 17000)):
+                        self.lMemory.local_strings[self.variablesTable[self.currFunc]['vars'][params_s[-1][int(aux2[0])]]['memoryPos'] - 8000] = self.getValue(operand1)
+            elif(oper == 'RET'):
+                aux = self.variablesTable[self.currFunc]['type']
+
+                pos = 0
+                if(aux != ''):
+                    pos = self.variablesTable[self.programID]['vars'][self.currFunc]['memoryPos']
+
+                if(temp != None):
+                    if(aux == 'int'):
+                        self.gMemory.global_ints[pos - 1000] = self.getValue(temp)
+                    elif(aux == 'float'):
+                        self.gMemory.global_floats[pos - 2000] = self.getValue(temp)
+                    elif(aux == 'bool'):
+                        self.gMemory.global_bools[pos - 2000] = self.getValue(temp)
+                    elif(aux == 'string'):
+                        self.gMemory.global_strings[pos - 2000] = self.getValue(temp)
+
+                self.lMemory.delete()
+                self.tMemory.delete()
+                quadCont = pending_s.pop() + 1
+                params_s.pop()
+                if(len(funcs_s) > 1):
+                    funcs_s.pop()
+                    self.currFunc = funcs_s.pop()
+                continue
+            elif(oper == 'ENDPROC'):
+                self.tMemory.delete()
+                self.lMemory.delete()
+                quadCont = pending_s.pop() + 1
+                params_s.pop()
+                funcs_s.pop()
+                if(len(funcs_s) > 1):
+                    funcs_s.pop()
+                    self.currFunc = funcs_s.pop()
+                continue
             elif(oper == '+'):
                 # if(1000 <= temp < 2000):
                 #     self.gMemory.global_ints[temp - 1000] = self.getValue(operand1) + self.getValue(operand2)
@@ -297,6 +352,9 @@ class virtualMachine():
                     self.lMemory.local_bools_s[-1][temp - 7000] = self.getValue(operand1)
                 elif(8000 <= temp < 9000):
                     self.lMemory.local_strings_s[-1][temp - 8000] = self.getValue(operand1)
+                elif(13000 <= temp < 14000):
+                    self.tMemory.temp_ints_s[-1][temp - 13000] = self.getValue(operand1)
+
             elif(oper == 'print'):
                 print(self.getValue(temp))
             elif(oper == 'listen'):
@@ -349,4 +407,4 @@ class virtualMachine():
                     self.gMemory.global_strings[temp - 4000] = aux
                 elif(8000 <= temp < 9000):
                     self.lMemory.local_strings_s[-1][temp - 8000] = aux
-            self.quadCont += 1
+            quadCont += 1

@@ -71,6 +71,27 @@ class temporalMemory():
         self.tempBool = 15000
         self.tempString = 16000
         self.tempPointer = 17000
+
+    def load(self, variablesTable, currFunc):
+        # Initializing Temp Memory
+        # Int Temp Memory (First Value)
+        for i in range(0, variablesTable[currFunc]['numTemps'][0]):
+            self.temp_ints.append(None)
+        # Float Temp Memory (Second Value) 
+        for i in range(0, variablesTable[currFunc]['numTemps'][1]):
+            self.temp_floats.append(None)
+        # Bool Temp Memory (Third Value)
+        for i in range(0, variablesTable[currFunc]['numTemps'][2]):
+            self.temp_bools.append(None)
+        # Strings Temp Memory (Fourth Value)
+        for i in range(0, variablesTable[currFunc]['numTemps'][3]):
+            self.temp_strings.append(None)
+
+    def delete(self):
+        self.temp_ints_s.pop()
+        self.temp_floats_s.pop()
+        self.temp_bools_s.pop()
+        self.temp_strings_s.pop()
         
     def __str__(self):
         return f'Current const pos (int/float/bool/string): {self.tempInt} {self.tempFloat} {self.tempBool} {self.tempString}'

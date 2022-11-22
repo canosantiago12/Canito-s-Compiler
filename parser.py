@@ -19,6 +19,7 @@ lMemory = localMemory()
 variablesTable = {}
 auxVars = [0, 0, 0, 0]
 auxTemps = [0, 0, 0, 0, 0]
+auxParams = [0, 0, 0, 0]
 constantsTable = {'int': {}, 'float': {}, 'bool': {}, 'string': {}}
 
 # Semantic Cube
@@ -36,10 +37,14 @@ quadsCont = 0
 tempsCont = 1
 
 funcID = ''
+auxFunc = ''
+returnFunc = ''
 programID = ''
 varID = ''
 varType = ''
 currType = ''
+flagReturn = False
+contParams = 0
 
 #====== PARSER ======#
 # Main function variables and functions Rules
@@ -50,7 +55,7 @@ def p_mainFunction(p):
 
 def p_globalVariables(p):
     '''
-    globalVariables : vars
+    globalVariables : vars addMemoryInfo
                     | empty
     '''
 
@@ -82,14 +87,14 @@ def p_vars_type_single(p):
 
 def p_vars_type_array(p):
     '''
-    vars_type_array : CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_array
-                    | CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+    vars_type_array : CTE_ID saveVariableID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveArray COMMA vars_type_array
+                    | CTE_ID saveVariableID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveArray SEMI_COLON auxVars
     '''
 
 def p_vars_type_matrix(p):
     '''
-    vars_type_matrix : CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET COMMA vars_type_matrix
-                     | CTE_ID saveVariableID LEFT_BRACKET CTE_INT RIGHT_BRACKET LEFT_BRACKET CTE_INT RIGHT_BRACKET SEMI_COLON auxVars
+    vars_type_matrix : CTE_ID saveVariableID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveMat COMMA vars_type_matrix
+                     | CTE_ID saveVariableID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveMat SEMI_COLON auxVars
     '''
 
 # Functions Rules
@@ -101,7 +106,7 @@ def p_funcs(p):
 def p_funcs_aux(p):
     '''
     funcs_aux : FUNC type CTE_ID saveFuncID LEFT_PAREN params RIGHT_PAREN funcBody addMemoryInfo endFunction
-              | FUNC CTE_ID saveFuncID LEFT_PAREN params RIGHT_PAREN funcBody addMemoryInfo endFunction
+              | FUNC CTE_ID saveFuncID setVoidType LEFT_PAREN params RIGHT_PAREN funcBody addMemoryInfo endFunction
     '''
 
 def p_params(p):
@@ -112,7 +117,7 @@ def p_params(p):
 
 def p_auxParams(p):
     '''
-    auxParams : type CTE_ID multipleParams
+    auxParams : type CTE_ID addParam multipleParams
     '''
 
 def p_multipleParams(p):
@@ -130,6 +135,7 @@ def p_auxFuncBody(p):
     '''
     auxFuncBody : vars statements auxFuncBody
                 | statements auxFuncBody
+                | vars
                 | empty
     '''
 
@@ -138,18 +144,6 @@ def p_auxFuncBody(p):
 #     auxFuncBody : statements auxFuncBody
 #                 | empty
 #     '''
-
-# Function return Rules
-def p_return(p):
-    '''
-    return : RETURN RETURN_SIGN LEFT_PAREN auxReturn RIGHT_PAREN SEMI_COLON
-    '''
-
-def p_auxReturn(p):
-    '''
-    auxReturn : logicExpression
-              | empty
-    '''
 
 # Variables type Rules
 def p_type(p):
@@ -168,7 +162,14 @@ def p_statements(p):
                | reading
                | if
                | while
+               | auxFuncCall
                | return
+    '''
+
+# Assing Rules
+def p_assignment(p):
+    '''
+    assignment : CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON
     '''
 
 # Writting Rules
@@ -192,7 +193,7 @@ def p_multipleWrite(p):
 # Reading Rules
 def p_reading(p):
     '''
-    reading : READ_INPUT addOperator LEFT_PAREN auxReading RIGHT_PAREN SEMI_COLON
+    reading : READ_INPUT LEFT_PAREN auxReading RIGHT_PAREN SEMI_COLON
     '''
 
 def p_auxReading(p):
@@ -204,12 +205,6 @@ def p_multipleRead(p):
     '''
     multipleRead : COMMA auxReading
                  | empty
-    '''
-
-# Assing Rules
-def p_assignment(p):
-    '''
-    assignment : CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON
     '''
 
 # Expressions Rules
@@ -283,6 +278,7 @@ def p_constants(p):
               | CTE_STRING addConstantOperand
               | TRUE addConstantBool
               | FALSE addConstantBool
+              | functionCall
     '''
 
 # Conditional Rules
@@ -293,25 +289,55 @@ def p_if(p):
 
 def p_else(p):
     '''
-    else : ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody endIF
+    else : ELSE doElse IF LEFT_PAREN logicExpression doIF RIGHT_PAREN funcBody else endIF
          | ELSE doElse funcBody
          | empty
     '''
 
+# While Rules
 def p_while(p):
     '''
     while : WHILE LEFT_PAREN addCondStart logicExpression doWhile RIGHT_PAREN funcBody endWhile
     '''
 
-def p_for(p):
+# Function Call Rules
+def p_functionCall(p):
     '''
-    for : FOR LEFT_PAREN CTE_ID COMMA auxFor COMMA auxFor RIGHT_PAREN funcBody
+    functionCall : CTE_ID doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSub
     '''
 
-def p_auxFor(p):
+def p_auxFuncCall(p):
     '''
-    auxFor : CTE_ID 
-           | CTE_INT
+    auxFuncCall : functionCall SEMI_COLON
+    '''
+
+def p_arguments(p):
+    '''
+    arguments : auxArguments
+              | empty
+    '''
+
+def p_auxArguments(p):
+    '''
+    auxArguments : logicExpression checkType multipleArguments
+    '''
+
+def p_multipleArguments(p):
+    '''
+    multipleArguments : COMMA auxArguments
+                      | empty
+    '''
+
+# Function return Rules
+def p_return(p):
+    '''
+    return : RETURN RETURN_SIGN LEFT_PAREN auxReturn RIGHT_PAREN SEMI_COLON
+    '''
+
+def p_auxReturn(p):
+    '''
+    auxReturn : logicExpression doReturn
+              | empty
     '''
 
 #==== AUX FUNCS ====#
@@ -337,7 +363,7 @@ def p_startup(p):
 
     programID = p[-1]
     funcID = programID
-    variablesTable[programID] = {'type' : '', 'vars' : {}, 'start' : quadsCont, 'numVars' : [], 'numTemps' : []}
+    variablesTable[programID] = {'type' : '', 'params' : {}, 'vars' : {}, 'start' : quadsCont, 'numVars' : [], 'numTemps' : []}
     newQuad = Quadruple('GOTO', None, None, 'mainStage')
     quadruplesList.append(newQuad)
     quadsCont += 1
@@ -367,10 +393,10 @@ def p_endPrint(p):
         print(cont, x)
         cont += 1
 
-    # print(f"OPERATOR STACK = {operatorStack}")
-    # print(f"OPERAND STACK = {operandsStack}")
-    # print(f"TYPE STACK = {typesStack}")
-    # print(f"JUMPS STACK = {jumpsStack}")
+    print(f"OPERATOR STACK = {operatorStack}")
+    print(f"OPERAND STACK = {operandsStack}")
+    print(f"TYPE STACK = {typesStack}")
+    print(f"JUMPS STACK = {jumpsStack}")
 
 def p_saveFuncID(p):
     'saveFuncID :'
@@ -380,7 +406,16 @@ def p_saveFuncID(p):
     auxTemps = [0, 0, 0, 0, 0]
     funcID = p[-1]
     if(funcID not in variablesTable):
-        variablesTable[funcID] = {'type': currType, 'vars': {}, 'start' : quadsCont, 'numVars' : [0, 0, 0, 0], 'numTemps' : [0, 0, 0, 0, 0]}
+        variablesTable[funcID] = {'type': currType, 'params' : {}, 'vars': {}, 'start' : quadsCont, 'numParams': [0, 0, 0, 0], 'numVars' : [0, 0, 0, 0], 'numTemps' : [0, 0, 0, 0, 0]}
+        if(currType != ''):
+            if(funcID not in variablesTable[programID]['vars']):
+                pos = gMemory.malloc(currType, 1)
+                variablesTable[programID]['vars'][funcID] = {'type': currType, 'memoryPos': pos}
+            else:
+                print(f'Function \'{funcID}\' has already been declared!')
+                sys.exit()
+        lMemory.free()
+        tMemory.free()
         # if(funcID != 'mainStage'):
         #     variablesTable[funcID] = {'type': currType, 'vars': {}, 'start' : quadsCont, 'numVars' : [0, 0, 0, 0], 'numTemps' : [0, 0, 0, 0, 0]}
         # else:
@@ -391,17 +426,56 @@ def p_saveFuncID(p):
 
     #print(funcID, currType)
 
+def p_addParam(p):
+    'addParam :'
+    global funcID, varID, auxParams, currType
+
+    varID = p[-1]
+    if varID not in variablesTable[funcID]['vars']:
+        aux = 0
+        pos = lMemory.malloc(currType, 1)
+        variablesTable[funcID]['vars'][varID] = {'type': currType, 'memoryPos': pos}
+
+        if(len(variablesTable[funcID]['params'])) == 0:
+            auxParams = [0, 0, 0, 0]
+
+        if(currType == 'int'):
+            aux = auxParams[0]
+            auxParams[0] += 1
+        elif(currType == 'float'):
+            aux = auxParams[1]
+            auxParams[1] += 1
+        elif(currType == 'bool'):
+            aux = auxParams[2]
+            auxParams[2] += 1
+        elif(currType == 'string'):
+            aux = auxParams[3]
+            auxParams[3] += 1
+
+        variablesTable[funcID]['params'][aux] = currType
+    else:
+        print(f'Variable \'{varID}\' has already been declared!')
+        sys.exit()    
+
 def p_addMemoryInfo(p):
     'addMemoryInfo :'
-    global variablesTable
+    global variablesTable, auxParams
 
     variablesTable[funcID]['numVars'] = auxVars
+    variablesTable[funcID]['numParams'] = auxParams
+    auxParams = [0, 0, 0, 0]
 
 def p_endFunction(p):
     'endFunction :'
-    global quadruplesList, variablesTable, quadsCont, currType
+    global quadruplesList, variablesTable, quadsCont, currType, flagReturn
 
     if(funcID != 'mainStage'):
+        if(variablesTable[funcID]['type'] == '' and flagReturn):
+            print(f'Function [ {funcID} ] expects no return value !!!')
+            sys.exit()
+        if(variablesTable[funcID]['type'] != '' and not flagReturn):
+            print(f"Function [ {funcID} ] expects [ {variablesTable[funcID]['type']} ] no return value !!!")
+            sys.exit()
         newQuad = Quadruple('ENDPROC', None, None, None)
         quadruplesList.append(newQuad)
         quadsCont += 1
@@ -409,76 +483,11 @@ def p_endFunction(p):
     currType = ''
     tMemory.free()
     lMemory.free()
-
-# Conditionals (IF)
-def p_doIF(p):
-    'doIF :'
-    global operandsStack, typesStack, jumpsStack, quadruplesList, quadsCont
-
-    cond = operandsStack.pop()
-    condType = typesStack.pop()
-    if(condType != 'bool'):
-        print('You need an expression that returns a bool(true/false) to use it in a conditional! :(')
-    else:
-        newQuad = Quadruple('GOTOF', cond, None, None)
-        quadruplesList.append(newQuad)
-        quadsCont = quadsCont + 1
-        jumpsStack.append(quadsCont - 1)
-
-def p_endIF(p):
-    'endIF :'
-    global jumpsStackm, quadsCont
-
-    jumpFalse = jumpsStack.pop()
-    quadruplesList[jumpFalse].temp = quadsCont
-
-# Conditionals (ELSE)
-def p_doElse(p):
-    'doElse :'
-    global jumpsStackm, quadsCont
-
-    newQuad = Quadruple('GOTO', None, None, None)
-    quadruplesList.append(newQuad)
-    quadsCont = quadsCont + 1
-    jump = jumpsStack.pop()
-    jumpsStack.append(quadsCont - 1)
-    quadruplesList[jump].temp = quadsCont
-
-# Loops (WHILE)
-def p_doWhile(p):
-    'doWhile :'
-    global operandsStack, typesStack, jumpsStack, quadruplesList, quadsCont
-
-    cond = operandsStack.pop()
-    condType = typesStack.pop()
-    if(condType != 'bool'):
-        print('You need an expression that returns a bool(true/false) to use it in a while loop! :(')
-    else:
-        newQuad = Quadruple('GOTOF', cond, None, None)
-        quadruplesList.append(newQuad)
-        quadsCont = quadsCont + 1
-        jumpsStack.append(quadsCont - 1)
-
-def p_endWhile(p):
-    'endWhile :'
-    global operandsStack, typesStack, jumpsStack, quadruplesList, quadsCont
-
-    pendingJump = jumpsStack.pop()
-    condStartJump = jumpsStack.pop()
-    newQuad = Quadruple('GOTO', None, None, condStartJump)
-    quadruplesList.append(newQuad)
-    quadsCont = quadsCont + 1
-    quadruplesList[pendingJump].temp = quadsCont
-
-def p_addCondStart(p):
-    'addCondStart :'
-    global jumpsStack
-
-    jumpsStack.append(quadsCont)
+    flagReturn = False
 
 def p_saveVariableID(p):
     'saveVariableID :'
-    global varID, currType, auxMemory
+    global varID, currType, auxVars
 
     varID = p[-1]
     if varID not in variablesTable[funcID]['vars']:
@@ -504,6 +513,23 @@ def p_saveVariableID(p):
 
     #print(f'Variable id = {p[-1]}')
 
+def p_saveArray(p):
+    'saveArray :'
+    global varID, currType
+
+    varID = p[-6]
+    size1 = p[-3]
+    if varID not in variablesTable[funcID]['vars']:
+        pos = 0
+
+        if(funcID == programID):
+            pos = gMemory.malloc(currType, size1)
+        else:
+            pos = lMemory.malloc(currType, size1)
+
+def p_saveMat(p):
+    'saveMat :'
+
 def p_setCurrentType(p):
     'setCurrentType :'
     global currType
@@ -522,7 +548,7 @@ def p_addOperand(p):
         operandsStack.append(variablesTable[programID]['vars'][oper]['memoryPos'])
         typesStack.append(variablesTable[programID]['vars'][oper]['type'])
     else:
-        print(f'Variable \'{oper}\' does not exist :(')
+        print(f'Variable [ {oper} ] does not exist !!!')
         sys.exit()
 
 def p_addConstantOperand(p):
@@ -594,7 +620,7 @@ def p_doLogicExpression(p):
             leftType = typesStack.pop()
 
             if semanticCube[leftType][rightType][operator] == 'error':
-                print(f'Cannot perform operation {operator} with: [ {leftType}] and [ {rightType} ] !!!')
+                print(f'Cannot perform operation [ {operator} ] with: [ {leftType}] and [ {rightType} ] !!!')
                 sys.exit()
             else:
                 resType = semanticCube[leftType][rightType][operator]
@@ -648,7 +674,7 @@ def p_doExpression(p):
             leftType = typesStack.pop()
 
             if semanticCube[leftType][rightType][operator] == 'error':
-                print(f'Cannot perform operation {operator} with: [ {leftType}] and [ {rightType} ] !!!')
+                print(f'Cannot perform operation [ {operator} ] with: [ {leftType}] and [ {rightType} ] !!!')
                 sys.exit()
             else:
                 resType = semanticCube[leftType][rightType][operator]
@@ -675,7 +701,7 @@ def p_doTerm(p):
             leftType = typesStack.pop()
 
             if semanticCube[leftType][rightType][operator] == 'error':
-                print(f'Cannot perform operation {operator} with: [ {leftType}] and [ {rightType} ] !!!')
+                print(f'Cannot perform operation  [ {operator} ] with: [ {leftType}] and [ {rightType} ] !!!')
                 sys.exit()
             else:
                 resType = semanticCube[leftType][rightType][operator]
@@ -737,6 +763,156 @@ def p_doReading(p):
     quadruplesList.append(newQuad)
     quadsCont += 1
 
+# Conditionals (IF)
+def p_doIF(p):
+    'doIF :'
+    global operandsStack, typesStack, jumpsStack, quadruplesList, quadsCont
+
+    cond = operandsStack.pop()
+    condType = typesStack.pop()
+    if(condType != 'bool'):
+        print('You need an expression that returns a bool(true/false) to use it in a conditional !!!')
+        sys.exit()
+    else:
+        newQuad = Quadruple('GOTOF', cond, None, None)
+        quadruplesList.append(newQuad)
+        quadsCont += 1
+        jumpsStack.append(quadsCont - 1)
+
+def p_endIF(p):
+    'endIF :'
+    global jumpsStackm, quadsCont
+
+    jumpFalse = jumpsStack.pop()
+    quadruplesList[jumpFalse].temp = quadsCont
+
+# Conditionals (ELSE)
+def p_doElse(p):
+    'doElse :'
+    global jumpsStackm, quadsCont
+
+    newQuad = Quadruple('GOTO', None, None, None)
+    quadruplesList.append(newQuad)
+    quadsCont += 1
+    jump = jumpsStack.pop()
+    jumpsStack.append(quadsCont - 1)
+    quadruplesList[jump].temp = quadsCont
+
+# Loops (WHILE)
+def p_doWhile(p):
+    'doWhile :'
+    global operandsStack, typesStack, jumpsStack, quadruplesList, quadsCont
+
+    cond = operandsStack.pop()
+    condType = typesStack.pop()
+    if(condType != 'bool'):
+        print('You need an expression that returns a bool(true/false) to use it in a while loop !!!')
+        sys.exit()
+    else:
+        newQuad = Quadruple('GOTOF', cond, None, None)
+        quadruplesList.append(newQuad)
+        quadsCont += 1
+        jumpsStack.append(quadsCont - 1)
+
+def p_endWhile(p):
+    'endWhile :'
+    global operandsStack, typesStack, jumpsStack, quadruplesList, quadsCont
+
+    pendingJump = jumpsStack.pop()
+    condStartJump = jumpsStack.pop()
+    newQuad = Quadruple('GOTO', None, None, condStartJump)
+    quadruplesList.append(newQuad)
+    quadsCont += 1
+    quadruplesList[pendingJump].temp = quadsCont
+
+def p_addCondStart(p):
+    'addCondStart :'
+    global jumpsStack
+
+    jumpsStack.append(quadsCont)
+
+# Function Call
+def p_doFunCall(p):
+    'doFuncCall :'
+    global contParams, operatorStack, returnFunc, auxFunc, quadruplesList, quadsCont
+
+    auxFunc = p[-1]
+
+    if(auxFunc in variablesTable):
+        contParams = 0
+        returnFunc = funcID
+        operatorStack.append('(')
+        newQuad = Quadruple('ERA', None, None, auxFunc)
+        quadruplesList.append(newQuad)
+        quadsCont += 1
+    else:
+        print(f'Function [ {auxFunc} ] is not declared !!!')
+        sys.exit()
+
+def p_setVoidType(p):
+    'setVoidType :'
+    variablesTable[funcID]['type'] = ''
+
+def p_checkParams(p):
+    'checkParams :'
+    global variablesTable, contParams
+    if(len(variablesTable[auxFunc]['params']) != contParams):
+        print(f"Function [ {auxFunc} ] expected [ {len(variablesTable[auxFunc]['params'])} ] and got [ {contParams} ] instead !!!")
+        sys.exit()
+    contParams = 0
+
+def p_checkType(p):
+    'checkType :'
+    global contParams, typesStack, operandsStack, quadruplesList, quadsCont
+
+    if(contParams in variablesTable[auxFunc]['params']):
+        paramType = typesStack.pop()
+        if(paramType == variablesTable[auxFunc]['params'][contParams]):
+            operand = operandsStack.pop()
+            newQuad = Quadruple('PARAM', operand, None, 'PAR ' + str(contParams))
+            quadruplesList.append(newQuad)
+            quadsCont += 1
+        else:
+            print(f"Function [ {auxFunc} ] expects [ {variablesTable[auxFunc]['params'][contParams] } ] as #{ contParams + 1} argument !!!")
+            sys.exit()
+    contParams += 1
+
+def p_doReturn(p):
+    'doReturn :'
+    global flagReturn, quadruplesList, operandsStack, typesStack, quadsCont
+
+    flagReturn = True
+    oper = operandsStack.pop()
+    operType = typesStack.pop()
+
+    if operType != variablesTable[funcID]['type']:
+        print(f"Function [ {funcID} ] expects [ {variablesTable[funcID]['type']} ] as return type !!!")
+        sys.exit()
+    else:
+        newQuad = Quadruple('RET', None, None, oper)
+        quadruplesList.append(newQuad)
+        quadsCont += 1
+
+def p_doGoSub(p):
+    'doGoSub :'
+    global operatorStack, quadruplesList, quadsCont, auxFunc, operandsStack
+    operatorStack.pop()
+    newQuad = Quadruple('GOSUB', None, None, variablesTable[auxFunc]['start'])
+    quadruplesList.append(newQuad)
+    quadsCont += 1
+    if(variablesTable[auxFunc]['type'] != ''):
+        pos = variablesTable[programID]['vars'][auxFunc]['memoryPos']
+        temp = tMemory.malloc(variablesTable[auxFunc]['type'], 1)
+        newQuad = Quadruple('=', pos, None, temp)
+        quadruplesList.append(newQuad)
+        quadsCont += 1
+
+        operandsStack.append(temp)
+        typesStack.append(variablesTable[auxFunc]['type'])
+        addTemp(variablesTable[auxFunc]['type'])
+
+    auxFunc = ''
+    
 # Error handling
 def p_error(p):
     print(f'Syntax error at {p.value!r}')
