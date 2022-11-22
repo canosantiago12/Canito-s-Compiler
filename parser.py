@@ -75,7 +75,6 @@ def p_auxVars(p):
     '''
     auxVars : VAR type vars_type_single
             | VAR type vars_type_array
-            | VAR type vars_type_matrix
             | empty
     '''
 
@@ -87,14 +86,8 @@ def p_vars_type_single(p):
 
 def p_vars_type_array(p):
     '''
-    vars_type_array : CTE_ID saveVariableID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveArray COMMA vars_type_array
-                    | CTE_ID saveVariableID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveArray SEMI_COLON auxVars
-    '''
-
-def p_vars_type_matrix(p):
-    '''
-    vars_type_matrix : CTE_ID saveVariableID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveMat COMMA vars_type_matrix
-                     | CTE_ID saveVariableID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveMat SEMI_COLON auxVars
+    vars_type_array : CTE_ID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveArray COMMA vars_type_array
+                    | CTE_ID LEFT_BRACKET CTE_INT addConstantOperand RIGHT_BRACKET saveArray SEMI_COLON auxVars
     '''
 
 # Functions Rules
@@ -170,6 +163,7 @@ def p_statements(p):
 def p_assignment(p):
     '''
     assignment : CTE_ID addOperand EQUAL addOperator logicExpression doAssign SEMI_COLON
+               | CTE_ID LEFT_BRACKET addParenthesis logicExpression RIGHT_BRACKET addOperand removeParenthesis EQUAL addOperator logicExpression doAssign SEMI_COLON
     '''
 
 # Writting Rules
@@ -273,6 +267,7 @@ def p_factor(p):
 def p_constants(p):
     '''
     constants : CTE_ID addOperand
+              | CTE_ID LEFT_BRACKET addParenthesis logicExpression RIGHT_BRACKET addOperand removeParenthesis
               | CTE_INT addConstantOperand
               | CTE_FLOAT addConstantOperand
               | CTE_STRING addConstantOperand
@@ -352,6 +347,8 @@ def addTemp(type):
         auxTemps[2] += 1
     elif type == 'string':
         auxTemps[3] += 1
+    elif type == 'pointer':
+        auxTemps[4] += 1
     else:
         print("ERROR")
         sys.exit()
@@ -508,27 +505,48 @@ def p_saveVariableID(p):
             auxVars[3] += 1
         variablesTable[funcID]['vars'][varID] = {'type': currType, 'memoryPos': pos}
     else:
-        print(f'Variable \'{varID}\' has already been declared!')
+        print(f'Variable [ {varID} ] has already been declared !!!')
         sys.exit()
-
-    #print(f'Variable id = {p[-1]}')
 
 def p_saveArray(p):
     'saveArray :'
-    global varID, currType
+    global varID, currType, typesStack, operandsStack
 
-    varID = p[-6]
+    varID = p[-5]
     size1 = p[-3]
-    if varID not in variablesTable[funcID]['vars']:
-        pos = 0
-
+    typesStack.pop()
+    operandsStack.pop()
+    pos = 0
+    
+    if(varID) not in variablesTable[funcID]['vars']:
         if(funcID == programID):
             pos = gMemory.malloc(currType, size1)
         else:
             pos = lMemory.malloc(currType, size1)
 
-def p_saveMat(p):
-    'saveMat :'
+        if currType == 'int':
+            auxVars[0] += size1
+        elif currType == 'float':
+            auxVars[1] += size1
+        elif currType == 'bool':
+            auxVars[2] += size1
+        else:
+            auxVars[3] += size1
+        variablesTable[funcID]['vars'][varID] = {'type': currType, 'memoryPos': pos, 'size': size1}
+    else:
+        print(f'Variable [ {varID} ] has already been declared !!!')
+        sys.exit()
+
+    auxPos = pos
+    if(auxPos not in constantsTable['int']):
+        pos = cMemory.malloc('int', 1)
+        constantsTable['int'][auxPos] = {'type': 'int', 'memoryPos': pos}
+    if(0 not in constantsTable['int']):
+        pos = cMemory.malloc('int', 1)
+        constantsTable['int'][0] = {'type': 'int', 'memoryPos': pos}
+    if(size1 not in constantsTable['int']):
+        pos = cMemory.malloc('int', 1)
+        constantsTable['int'][size1] = {'type': 'int', 'memoryPos': pos}
 
 def p_setCurrentType(p):
     'setCurrentType :'
@@ -538,18 +556,61 @@ def p_setCurrentType(p):
 
 def p_addOperand(p):
     'addOperand :'
-    global operandsStack, typesStack, auxVars, auxTemps
+    global operandsStack, typesStack, auxVars, auxTemps, quadruplesList, quadsCont
 
     oper = p[-1]
-    if oper in variablesTable[funcID]['vars']:
-        operandsStack.append(variablesTable[funcID]['vars'][oper]['memoryPos'])
-        typesStack.append(variablesTable[funcID]['vars'][oper]['type'])
-    elif oper in variablesTable[programID]['vars']:
-        operandsStack.append(variablesTable[programID]['vars'][oper]['memoryPos'])
-        typesStack.append(variablesTable[programID]['vars'][oper]['type'])
+    if(oper != ']'):
+        if oper in variablesTable[funcID]['vars']:
+            operandsStack.append(variablesTable[funcID]['vars'][oper]['memoryPos'])
+            typesStack.append(variablesTable[funcID]['vars'][oper]['type'])
+        elif oper in variablesTable[programID]['vars']:
+            operandsStack.append(variablesTable[programID]['vars'][oper]['memoryPos'])
+            typesStack.append(variablesTable[programID]['vars'][oper]['type'])
+        else:
+            print(f'Variable [ {oper} ] does not exist !!!')
+            sys.exit()
     else:
-        print(f'Variable [ {oper} ] does not exist !!!')
-        sys.exit()
+        oper = p[-5]
+        operand1 = operandsStack.pop()
+        typesStack.pop()
+        if(oper in variablesTable[funcID]['vars']):
+            if 'size' in variablesTable[funcID]['vars'][oper]:
+                newQuad = Quadruple('VER', operand1, constantsTable['int'][0]['memoryPos'], constantsTable['int'][variablesTable[funcID]['vars'][oper]['size']]['memoryPos'])
+                quadruplesList.append(newQuad)
+                quadsCont += 1
+
+                pos = tMemory.malloc('pointer', 1)
+                
+                newQuad = Quadruple('+', operand1, constantsTable['int'][variablesTable[funcID]['vars'][oper]['memoryPos']]['memoryPos'], pos)
+                quadruplesList.append(newQuad)
+                quadsCont += 1
+
+                operandsStack.append('*' + str(pos))
+                typesStack.append(variablesTable[funcID]['vars'][oper]['type'])
+            else:
+                print(f"Variable [ {oper} ] is not an array !!!")
+                sys.exit()
+        elif(oper in variablesTable[programID]['vars']):
+            if 'size' in variablesTable[programID]['vars'][oper]:
+                newQuad = Quadruple('VER', operand1, constantsTable['int'][0]['memoryPos'], constantsTable['int'][variablesTable[programID]['vars'][oper]['size']]['memoryPos'])
+                quadruplesList.append(newQuad)
+                quadsCont += 1
+
+                pos = tMemory.malloc('pointer', 1)
+                
+                newQuad = Quadruple('+', operand1, constantsTable['int'][variablesTable[programID]['vars'][oper]['memoryPos']]['memoryPos'], pos)
+                quadruplesList.append(newQuad)
+                quadsCont += 1
+
+                operandsStack.append('*' + str(pos))
+                typesStack.append(variablesTable[programID]['vars'][oper]['type'])
+            else:
+                print(f"Variable [ {oper} ] is not an array !!!")
+                sys.exit()
+        else:
+            print(f'Variable [ {oper} ] does not exist !!!')
+            sys.exit()
+        addTemp('pointer')
 
 def p_addConstantOperand(p):
     'addConstantOperand :'

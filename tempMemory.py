@@ -17,6 +17,8 @@ class temporalMemory():
         self.temp_bools_s = deque()
         self.temp_strings = []
         self.temp_strings_s = deque()
+        self.temp_pointers = []
+        self.temp_pointers_s = deque()
 
     def malloc(self, tempType, size):
         if tempType == 'int':
@@ -64,6 +66,8 @@ class temporalMemory():
         self.temp_bools = []
         self.temp_strings_s.append(self.temp_strings)
         self.temp_strings = []
+        self.temp_pointers_s.append(self.temp_pointers)
+        self.temp_pointers = []
 
     def free(self):
         self.tempInt = 13000
@@ -86,12 +90,16 @@ class temporalMemory():
         # Strings Temp Memory (Fourth Value)
         for i in range(0, variablesTable[currFunc]['numTemps'][3]):
             self.temp_strings.append(None)
+        # Pointer Temp Memory (Fifth Value)
+        for i in range(0, variablesTable[currFunc]['numTemps'][4]):
+            self.temp_pointers.append(None)   
 
     def delete(self):
         self.temp_ints_s.pop()
         self.temp_floats_s.pop()
         self.temp_bools_s.pop()
         self.temp_strings_s.pop()
+        self.temp_pointers_s.pop()
         
     def __str__(self):
         return f'Current const pos (int/float/bool/string): {self.tempInt} {self.tempFloat} {self.tempBool} {self.tempString}'

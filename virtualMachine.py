@@ -72,6 +72,8 @@ class virtualMachine():
                     return value['type']
 
     def getValue(self, pos):
+        if(isinstance(pos, str)):
+            pos = self.getValue(int(pos[1:]))
         if(1000 <= pos < 2000):
             if(self.gMemory.global_ints[pos - 1000] == None):
                 print(f"Variable [ {self.getVarID(pos, True)} ] has no value !!!")
@@ -149,6 +151,12 @@ class virtualMachine():
                 print(f"Variable [ {self.getVarID(pos, False)} ] has no value !!!")
                 sys.exit()
             return self.tMemory.temp_strings_s[-1][pos - 16000]
+        # Temp Pointer
+        elif(17000 <= pos < 18000):
+            if(self.tMemory.temp_pointers_s[-1][pos - 17000] == None):
+                print(f"Variable [ {self.getVarID(pos, False)} ] has no value !!!")
+                sys.exit()
+            return self.tMemory.temp_pointers_s[-1][pos - 17000]
 
     def exec(self):
         quadCont = 0
@@ -240,6 +248,10 @@ class virtualMachine():
                     funcs_s.pop()
                     self.currFunc = funcs_s.pop()
                 continue
+            elif(oper == 'VER'):
+                if(self.getValue(operand1) < self.getValue(operand2) or self.getValue(operand1) >= self.getValue(temp)):
+                    print(f"Index [ {self.getValue(operand1)} ] out of bounds !!!")
+                    sys.exit()
             elif(oper == '+'):
                 # if(1000 <= temp < 2000):
                 #     self.gMemory.global_ints[temp - 1000] = self.getValue(operand1) + self.getValue(operand2)
@@ -254,6 +266,8 @@ class virtualMachine():
                     self.tMemory.temp_ints_s[-1][temp - 13000] = self.getValue(operand1) + self.getValue(operand2)
                 elif(14000 <= temp < 15000):
                     self.tMemory.temp_floats_s[-1][temp - 14000] = self.getValue(operand1) + self.getValue(operand2)
+                elif(17000 <= temp < 18000):
+                    self.tMemory.temp_pointers_s[-1][temp - 17000] = self.getValue(operand1) + self.getValue(operand2)
             elif(oper == '-'):
                 if(13000 <= temp < 14000):
                     self.tMemory.temp_ints_s[-1][temp - 13000] = self.getValue(operand1) - self.getValue(operand2)
@@ -336,6 +350,12 @@ class virtualMachine():
                 if(15000 <= temp < 16000):
                     self.tMemory.temp_bools_s[-1][temp - 15000] = aux1 or aux2
             elif(oper == '='):
+                # if(isinstance(temp, str)):
+                #     temp = int(temp[1:])
+                resString = str(temp)
+                if(resString[0] == '*'):
+                    temp = self.getValue(int(resString[1:]))
+                
                 if(1000 <= temp < 2000):
                     self.gMemory.global_ints[temp - 1000] = self.getValue(operand1)
                 elif(2000 <= temp < 3000):
@@ -354,7 +374,8 @@ class virtualMachine():
                     self.lMemory.local_strings_s[-1][temp - 8000] = self.getValue(operand1)
                 elif(13000 <= temp < 14000):
                     self.tMemory.temp_ints_s[-1][temp - 13000] = self.getValue(operand1)
-
+                elif(17000 <= temp < 18000):
+                    self.tMemory.temp_pointers_s[-1][temp - 17000] = self.getValue(operand1)
             elif(oper == 'print'):
                 print(self.getValue(temp))
             elif(oper == 'listen'):
