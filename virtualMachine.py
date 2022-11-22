@@ -1,6 +1,10 @@
 import sys
 import re
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
+from numpy import random
 from collections import deque
 
 class virtualMachine():
@@ -11,6 +15,7 @@ class virtualMachine():
         self.constansTable = constantsTable
         self.numTemps = numTemps
         self.currFunc = 'mainStage'
+        self.last = []
 
     def __str__(self) -> str:
         return f'Progran Name: {self.programID}\nNum of quadruples: {len(self.quadruplesList)}'
@@ -24,13 +29,29 @@ class virtualMachine():
         # Initializing Global Memory
         for var in self.variablesTable[self.programID]['vars']:
             if(self.variablesTable[self.programID]['vars'][var]['type'] == 'int'):
-                self.gMemory.global_ints.append(None)
+                if 'size' in self.variablesTable[self.programID]['vars'][var]:
+                    for i in range(0, self.variablesTable[self.programID]['vars'][var]['size']):
+                        self.gMemory.global_ints.append(None)
+                else:
+                    self.gMemory.global_ints.append(None)
             elif(self.variablesTable[self.programID]['vars'][var]['type'] == 'float'):
-                self.gMemory.global_floats.append(None)
+                if 'size' in self.variablesTable[self.programID]['vars'][var]:
+                    for i in range(0, self.variablesTable[self.programID]['vars'][var]['size']):
+                        self.gMemory.global_floats.append(None)
+                else:
+                    self.gMemory.global_floats.append(None)
             elif(self.variablesTable[self.programID]['vars'][var]['type'] == 'bool'):
-                self.gMemory.global_bools.append(None)
+                if 'size' in self.variablesTable[self.programID]['vars'][var]:
+                    for i in range(0, self.variablesTable[self.programID]['vars'][var]['size']):
+                        self.gMemory.global_bools.append(None)
+                else:
+                    self.gMemory.global_bools.append(None)
             elif(self.variablesTable[self.programID]['vars'][var]['type'] == 'string'):
-                self.gMemory.global_strings.append(None)
+                if 'size' in self.variablesTable[self.programID]['vars'][var]:
+                    for i in range(0, self.variablesTable[self.programID]['vars'][var]['size']):
+                        self.gMemory.global_strings.append(None)
+                else:
+                    self.gMemory.global_strings.append(None)
 
         # Initializing Constant Memory
         for el in self.constansTable:
@@ -158,6 +179,120 @@ class virtualMachine():
                 sys.exit()
             return self.tMemory.temp_pointers_s[-1][pos - 17000]
 
+    def doBinomial(self, trials, prob, cases):
+        x = random.binomial(n=cases,p=prob, size=trials)
+        self.last.append(x)
+        print(x)
+
+        sns.displot(random.binomial(n=cases,p=prob, size=trials), kind='hist')
+        plt.title('Binomial Distribution')
+        plt.show()
+
+    def doPoisson(self, lamb, size):
+        x = random.poisson(lam=lamb, size=size)
+        self.last.append(x)
+        print(x)
+
+        sns.displot(random.poisson(lam=lamb, size=size))
+        plt.title('Poisson Distribution')
+        plt.show()
+
+    def doCompare(self):
+        aux1 = self.last.pop()
+        aux2 = self.last.pop()
+
+        sns.displot(aux1)
+        sns.displot(aux2)
+        plt.show()
+
+    def doNormal(self, mean, stdDev, size1, size2):
+        realSize = 0
+        if(size1 == 0):
+            realSize = size2
+        elif(size2 == 0):
+            realSize = size1
+        
+        if(realSize > 0):
+            x = random.normal(loc=mean, scale=stdDev, size=realSize)
+        else:
+            x = random.normal(loc=mean, scale=stdDev, size=(size1, size2))
+        print(x)
+
+        if(realSize > 0):
+            sns.displot(random.normal(size=realSize), kind='kde')
+            plt.title('Normal Distribution')
+            plt.show()
+        else:
+            sns.displot(random.normal(size=(size1, size2)), kind='kde')
+            plt.title('Normal Distribution')
+            plt.show()
+
+    def doUniform(self, low, high):
+        x = random.uniform(low=low, high=high, size=1000)
+        count, bins, ignored = plt.hist(x, 20, density=True)
+        plt.plot(bins, np.ones_like(bins),color='r')
+        plt.title('Uniform Distribution')
+        plt.ylabel('Density')
+        plt.xlabel('Values')
+        plt.show()
+
+    def auxLogi(self, x, mean, stdDev):
+        return np.exp((mean - x) / stdDev) / (stdDev * (1 + np.exp((mean - x) / stdDev)) ** 2)
+
+    def doLogi(self, mean, stdDev):
+        x = random.logistic(loc=mean, scale=stdDev, size=1000)
+        count, bins, ignored = plt.hist(x, bins=50)
+        aux = self.auxLogi(bins, mean, stdDev)
+        plt.plot(bins, aux * count.max() / aux.max())
+        plt.title('Logistic Distribution')
+        plt.ylabel('Density')
+        plt.xlabel('Values')
+        plt.show()
+
+    def doExponential(self, df, size1, size2):
+        realSize = 0
+        if(size1 == 0):
+            realSize = size2
+        elif(size2 == 0):
+            realSize = size1
+        
+        if(realSize > 0):
+            x = random.exponential(scale=df, size=realSize)
+        else:
+            x = random.exponential(scale=df, size=(size1, size2))
+        print(x)
+
+        if(realSize > 0):
+            sns.displot(random.exponential(size=realSize), kind='kde')
+            plt.title('Exponential Distribution')
+            plt.show()
+        else:
+            sns.displot(random.exponential(size=(size1, size2)), kind='kde')
+            plt.title('Exponential Distribution')
+            plt.show()
+
+    def doChiSquare(self, df, size1, size2):
+        realSize = 0
+        if(size1 == 0):
+            realSize = size2
+        elif(size2 == 0):
+            realSize = size1
+        
+        if(realSize > 0):
+            x = random.exponential(scale=df, size=realSize)
+        else:
+            x = random.exponential(scale=df, size=(size1, size2))
+        print(x)
+
+        if(realSize > 0):
+            sns.displot(random.chisquare(df=df, size=realSize), kind='kde')
+            plt.title('Chi-Square Distribution')
+            plt.show()
+        else:
+            sns.displot(random.chisquare(df=df, size=(size1, size2)), kind='kde')
+            plt.title('Chi-Square Distribution')
+            plt.show()
+
     def exec(self):
         quadCont = 0
         pending_s = deque()
@@ -191,19 +326,42 @@ class virtualMachine():
                     aux.append(key)
                 params_s.append(aux)
             elif(oper == 'GOSUB'):
-                jump = self.currFunc
                 self.lMemory.reset()
                 self.tMemory.reset()
-                for key, value in self.variablesTable.items():
-                    if(value['start'] == temp):
-                        jump = key
-                        continue
-                self.currFunc = jump
-                pending_s.append(quadCont)
-                quadCont = temp
-                continue
+                if(isinstance(temp, str)):
+                    if(temp == 'binomial'):
+                        self.doBinomial(self.lMemory.local_ints_s[-1][0], self.lMemory.local_floats_s[-1][0], self.lMemory.local_ints_s[-1][1])
+                    elif(temp == 'poisson'):
+                        self.doPoisson(self.lMemory.local_ints_s[-1][0], self.lMemory.local_ints_s[-1][1])
+                    elif(temp == 'compare'):
+                        self.doCompare()
+                    elif(temp == 'normal'):
+                        self.doNormal(self.lMemory.local_floats_s[-1][0], self.lMemory.local_floats_s[-1][1], self.lMemory.local_ints_s[-1][0], self.lMemory.local_ints_s[-1][1])
+                    elif(temp == 'uniform'):
+                        self.doUniform(self.lMemory.local_floats_s[-1][0], self.lMemory.local_floats_s[-1][1])
+                    elif(temp == 'logi'):
+                        self.doLogi(self.lMemory.local_floats_s[-1][0], self.lMemory.local_floats_s[-1][1])
+                    elif(temp == 'exponential'):
+                        self.doExponential(self.lMemory.local_floats_s[-1][0], self.lMemory.local_ints_s[-1][0],  self.lMemory.local_ints_s[-1][1])
+                    elif(temp == 'chiSquare'):
+                        self.doChiSquare(self.lMemory.local_floats_s[-1][0], self.lMemory.local_ints_s[-1][0],  self.lMemory.local_ints_s[-1][1])
+                    self.lMemory.delete()
+                    self.tMemory.delete()
+                else:
+                    jump = self.currFunc
+                    for key, value in self.variablesTable.items():
+                        if(value['start'] == temp):
+                            jump = key
+                            continue
+                    self.currFunc = jump
+                    pending_s.append(quadCont)
+                    quadCont = temp
+                    continue
             elif(oper == 'PARAM'):
                 aux2 = re.findall(r'\d+', temp)
+                
+                if(isinstance(operand1, str)):
+                    operand1 = self.getValue(int(operand1[1:]))
                 if(len(params_s[-1]) > 0):
                     if((1000 <= operand1 < 2000) or (5000 <= operand1 < 6000) or (9000 <= operand1 < 10000) or (13000 <= operand1 < 14000)):
                         self.lMemory.local_ints[self.variablesTable[self.currFunc]['vars'][params_s[-1][int(aux2[0])]]['memoryPos'] - 5000] = self.getValue(operand1)

@@ -1,3 +1,4 @@
 *.bts
 parser.out
 /__pycache__
+/codigos

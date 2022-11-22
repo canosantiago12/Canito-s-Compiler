@@ -22,6 +22,15 @@ auxTemps = [0, 0, 0, 0, 0]
 auxParams = [0, 0, 0, 0]
 constantsTable = {'int': {}, 'float': {}, 'bool': {}, 'string': {}}
 
+variablesTable['binomial'] = {'type':'', 'params': {0: 'int', 1:'float', 2: 'int'}, 'vars':{'trials': {'type':'int', 'memoryPos': 5000}, 'prob': {'type': 'floats', 'memoryPos': 6000}, 'cases':{'type': 'int', 'memoryPos': 5001}}, 'start': 0, 'numParams': [2, 1, 0, 0], 'numVars': [0, 0, 0, 0], 'numTemps': [0, 0, 0, 0, 0]}
+variablesTable['poisson'] = {'type':'', 'params': {0: 'int', 1:'int'}, 'vars':{'lambda': {'type':'int', 'memoryPos': 5000}, 'size':{'type': 'int', 'memoryPos': 5001}}, 'start': 0, 'numParams': [2, 0, 0, 0], 'numVars': [0, 0, 0, 0], 'numTemps': [0, 0, 0, 0, 0]}
+variablesTable['compare'] = {'type':'', 'params': {}, 'vars':{}, 'start': 0, 'numParams': [0, 0, 0, 0], 'numVars': [0, 0, 0, 0], 'numTemps': [0, 0, 0, 0, 0]}
+variablesTable['normal'] = {'type':'', 'params': {0: 'float', 1:'float', 2:'int', 3:'int'}, 'vars':{'mean': {'type':'float', 'memoryPos': 6000}, 'stdDev':{'type': 'float', 'memoryPos': 6001}, 'size1': {'type': 'int', 'memoryPos': 5000}, 'size2': {'type': 'int', 'memoryPos': 5001}}, 'start': 0, 'numParams': [2, 2, 0, 0], 'numVars': [0, 0, 0, 0], 'numTemps': [0, 0, 0, 0, 0]}
+variablesTable['uniform'] = {'type':'', 'params': {0: 'float', 1:'float'}, 'vars':{'low': {'type':'float', 'memoryPos': 6000}, 'high':{'type': 'float', 'memoryPos': 6001}}, 'start': 0, 'numParams': [0, 2, 0, 0], 'numVars': [0, 0, 0, 0], 'numTemps': [0, 0, 0, 0, 0]}
+variablesTable['logi'] = {'type':'', 'params': {0: 'float', 1:'float'}, 'vars':{'mean': {'type':'float', 'memoryPos': 6000}, 'stdDev':{'type': 'float', 'memoryPos': 6001}}, 'start': 0, 'numParams': [0, 2, 0, 0], 'numVars': [0, 0, 0, 0], 'numTemps': [0, 0, 0, 0, 0]}
+variablesTable['exponential'] = {'type':'', 'params': {0: 'float', 1:'int', 2: 'int'}, 'vars':{'df': {'type':'float', 'memoryPos': 6000}, 'size1':{'type': 'int', 'memoryPos': 5000}, 'size2': {'type': 'int', 'memoryPos': 5001}}, 'start': 0, 'numParams': [2, 1, 0, 0], 'numVars': [0, 0, 0, 0], 'numTemps': [0, 0, 0, 0, 0]}
+variablesTable['chiSquare'] = {'type':'', 'params': {0: 'float', 1:'int', 2: 'int'}, 'vars':{'df': {'type':'float', 'memoryPos': 6000}, 'size1':{'type': 'int', 'memoryPos': 5000}, 'size2': {'type': 'int', 'memoryPos': 5001}}, 'start': 0, 'numParams': [2, 1, 0, 0], 'numVars': [0, 0, 0, 0], 'numTemps': [0, 0, 0, 0, 0]}
+
 # Semantic Cube
 # Using a nested dictionary to create a relationship ALL to ALL and allow to reconize type mismatch errors
 semanticCube = Cube().CUBE
@@ -111,6 +120,7 @@ def p_params(p):
 def p_auxParams(p):
     '''
     auxParams : type CTE_ID addParam multipleParams
+              | type CTE_ID addParam LEFT_BRACKET CTE_INT RIGHT_BRACKET multipleParams
     '''
 
 def p_multipleParams(p):
@@ -299,6 +309,14 @@ def p_while(p):
 def p_functionCall(p):
     '''
     functionCall : CTE_ID doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSub
+                 | BINOMIAL doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSubS
+                 | POISSON doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSubS
+                 | COMPARE doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSubS
+                 | NORMAL doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSubS
+                 | UNIFORM doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSubS
+                 | LOGISTIC doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSubS
+                 | EXPONENTIAL doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSubS
+                 | CHISQUARE doFuncCall LEFT_PAREN arguments checkParams RIGHT_PAREN doGoSubS
     '''
 
 def p_auxFuncCall(p):
@@ -409,7 +427,7 @@ def p_saveFuncID(p):
                 pos = gMemory.malloc(currType, 1)
                 variablesTable[programID]['vars'][funcID] = {'type': currType, 'memoryPos': pos}
             else:
-                print(f'Function \'{funcID}\' has already been declared!')
+                print(f'Function [ {funcID} ] has already been declared !!!')
                 sys.exit()
         lMemory.free()
         tMemory.free()
@@ -418,7 +436,7 @@ def p_saveFuncID(p):
         # else:
         #     variablesTable[funcID] = {'type': 'void', 'vars': {}, 'start' : quadsCont, 'numVars' : [0, 0, 0, 0], 'numTemps' : [0, 0, 0, 0, 0]}
     else:
-        print(f'Function \'{funcID}\' has already been declared!')
+        print(f'Function [ {funcID} ] has already been declared !!!')
         sys.exit()
 
     #print(funcID, currType)
@@ -451,12 +469,12 @@ def p_addParam(p):
 
         variablesTable[funcID]['params'][aux] = currType
     else:
-        print(f'Variable \'{varID}\' has already been declared!')
+        print(f'Variable [ {varID} ] has already been declared !!!')
         sys.exit()    
 
 def p_addMemoryInfo(p):
     'addMemoryInfo :'
-    global variablesTable, auxParams
+    global variablesTable, auxParams, currType
 
     variablesTable[funcID]['numVars'] = auxVars
     variablesTable[funcID]['numParams'] = auxParams
@@ -517,13 +535,14 @@ def p_saveArray(p):
     typesStack.pop()
     operandsStack.pop()
     pos = 0
-    
-    if(varID) not in variablesTable[funcID]['vars']:
-        if(funcID == programID):
-            pos = gMemory.malloc(currType, size1)
-        else:
-            pos = lMemory.malloc(currType, size1)
 
+    if(funcID == programID):
+        pos = gMemory.malloc(currType, size1)
+    else:
+        pos = lMemory.malloc(currType, size1)
+    
+    if(varID not in variablesTable[funcID]['vars']):
+        variablesTable[funcID]['vars'][varID] = {'type': currType, 'memoryPos': pos, 'size': size1}
         if currType == 'int':
             auxVars[0] += size1
         elif currType == 'float':
@@ -532,7 +551,6 @@ def p_saveArray(p):
             auxVars[2] += size1
         else:
             auxVars[3] += size1
-        variablesTable[funcID]['vars'][varID] = {'type': currType, 'memoryPos': pos, 'size': size1}
     else:
         print(f'Variable [ {varID} ] has already been declared !!!')
         sys.exit()
@@ -910,6 +928,23 @@ def p_doFunCall(p):
         print(f'Function [ {auxFunc} ] is not declared !!!')
         sys.exit()
 
+""" def p_doBIF(p):
+    'doBIF :'
+    global auxFunc, contParams, returnFunc, quadsCont
+
+    auxFunc = p[-1]
+
+    if(auxFunc in variablesTable):
+        contParams = 0
+        returnFunc = funcID
+        operatorStack.append('(')
+        newQuad = Quadruple('ERAS', None, None, auxFunc)
+        quadruplesList.append(newQuad)
+        quadsCont += 1
+    else:
+        print(f'Function [ {auxFunc} ] is not declared !!!')
+        sys.exit() """
+
 def p_setVoidType(p):
     'setVoidType :'
     variablesTable[funcID]['type'] = ''
@@ -941,7 +976,6 @@ def p_checkType(p):
 def p_doReturn(p):
     'doReturn :'
     global flagReturn, quadruplesList, operandsStack, typesStack, quadsCont
-
     flagReturn = True
     oper = operandsStack.pop()
     operType = typesStack.pop()
@@ -962,6 +996,7 @@ def p_doGoSub(p):
     quadruplesList.append(newQuad)
     quadsCont += 1
     if(variablesTable[auxFunc]['type'] != ''):
+        print(auxFunc)
         pos = variablesTable[programID]['vars'][auxFunc]['memoryPos']
         temp = tMemory.malloc(variablesTable[auxFunc]['type'], 1)
         newQuad = Quadruple('=', pos, None, temp)
@@ -973,6 +1008,25 @@ def p_doGoSub(p):
         addTemp(variablesTable[auxFunc]['type'])
 
     auxFunc = ''
+
+def p_doGoSubS(p):
+    'doGoSubS :'
+    global operatorStack, quadruplesList, quadsCont, auxFunc, operandsStack
+    operatorStack.pop()
+    newQuad = Quadruple('GOSUB', None, None, auxFunc)
+    quadruplesList.append(newQuad)
+    quadsCont += 1
+    if(variablesTable[auxFunc]['type'] != ''):
+        print(auxFunc)
+        pos = variablesTable[programID]['vars'][auxFunc]['memoryPos']
+        temp = tMemory.malloc(variablesTable[auxFunc]['type'], 1)
+        newQuad = Quadruple('=', pos, None, temp)
+        quadruplesList.append(newQuad)
+        quadsCont += 1
+
+        operandsStack.append(temp)
+        typesStack.append(variablesTable[auxFunc]['type'])
+        addTemp(variablesTable[auxFunc]['type'])
     
 # Error handling
 def p_error(p):

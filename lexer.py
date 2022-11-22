@@ -7,7 +7,7 @@ tokens = ('IF', 'ELSE', 'FOR', 'WHILE',
         'VAR', 'INT', 'FLOAT', 'BOOL', 'STRING', 'TRUE', 'FALSE', 'CTE_INT', 'CTE_FLOAT', 'CTE_ID', 'CTE_STRING',
         'PLUS', 'MINUS', 'TIMES', 'DIV', 'MOD', 'EXP', 'EQUAL', 'LESS_THAN', 'LESS_EQUAL_THAN', 'GREATER_THAN', 'GREATER_EQUAL_THAN', 'EQUALS', 'NOT_EQUALS', 'AND', 'OR',
         'LEFT_PAREN', 'RIGHT_PAREN', 'LEFT_BRACKET', 'RIGHT_BRACKET', 'LEFT_CURLY_BRACKET', 'RIGHT_CURLY_BRACKET', 'COMMA', 'SEMI_COLON',
-        'MEAN', 'MEDIAN', 'MODE', 'STANDARD_DEVIATION', 'VARIANCE', 'POISSON', 'BINOMIAL', 'PLOT', 'PRINT', 'READ_INPUT'
+        'CHISQUARE', 'EXPONENTIAL', 'LOGISTIC', 'UNIFORM', 'NORMAL', 'COMPARE', 'POISSON', 'BINOMIAL', 'PRINT', 'READ_INPUT'
         )
 
 # Reserved words
@@ -27,7 +27,20 @@ reserved = {
     'true': 'TRUE',
     'false': 'FALSE',
     'listen' : 'READ_INPUT',
-    'print' : 'PRINT'
+    'print' : 'PRINT',
+    'mean' : 'MEAN',
+    'median' : 'MEDIAN',
+    'mode' : 'MODE',
+    'standardDeviation' : 'STANDARD_DEVIATION',
+    'variance' : 'VARIANCE',
+    'poisson' : 'POISSON',
+    'binomial' : 'BINOMIAL',
+    'compare' : 'COMPARE',
+    'normal' : 'NORMAL',
+    'uniform' : 'UNIFORM',
+    'logi' : 'LOGISTIC',
+    'exponential' : 'EXPONENTIAL',
+    'chiSquare' : 'CHISQUARE'
 }
 
 # Regexp
