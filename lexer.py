@@ -2,7 +2,7 @@ from re import M
 import ply.lex as lex
 
 # Tokens
-tokens = ('IF', 'ELSE', 'FOR', 'WHILE', 
+tokens = ('IF', 'ELSE', 'WHILE', 
         'FUNC', 'RETURN', 'RETURN_SIGN', 'MAIN', 'BTSProgam',
         'VAR', 'INT', 'FLOAT', 'BOOL', 'STRING', 'TRUE', 'FALSE', 'CTE_INT', 'CTE_FLOAT', 'CTE_ID', 'CTE_STRING',
         'PLUS', 'MINUS', 'TIMES', 'DIV', 'MOD', 'EXP', 'EQUAL', 'LESS_THAN', 'LESS_EQUAL_THAN', 'GREATER_THAN', 'GREATER_EQUAL_THAN', 'EQUALS', 'NOT_EQUALS', 'AND', 'OR',
@@ -18,7 +18,6 @@ reserved = {
     'return': 'RETURN',
     'if': 'IF',
     'else': 'ELSE',
-    'for': 'FOR',
     'while': 'WHILE',
     'int': 'INT',
     'float': 'FLOAT',
@@ -28,11 +27,6 @@ reserved = {
     'false': 'FALSE',
     'listen' : 'READ_INPUT',
     'print' : 'PRINT',
-    'mean' : 'MEAN',
-    'median' : 'MEDIAN',
-    'mode' : 'MODE',
-    'standardDeviation' : 'STANDARD_DEVIATION',
-    'variance' : 'VARIANCE',
     'poisson' : 'POISSON',
     'binomial' : 'BINOMIAL',
     'compare' : 'COMPARE',

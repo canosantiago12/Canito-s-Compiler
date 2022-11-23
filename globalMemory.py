@@ -12,6 +12,7 @@ class globalMemory():
         self.global_bools = []
         self.global_strings = []
 
+    # Increase our virtual memory address acording to the size we need
     def malloc(self, globalType, size):
         if globalType == 'int':
             if self.globalInt > 999 and self.globalInt < 2000:

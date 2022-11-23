@@ -12,6 +12,7 @@ class constantMemory():
         self.const_bools = []
         self.const_strings = []
 
+    # Increase our virtual memory address acording to the size we need
     def malloc(self, consType, size):
         if consType == 'int':
             if self.constantInt > 8999 and self.constantInt < 10000:
