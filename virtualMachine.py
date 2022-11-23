@@ -1,4 +1,11 @@
 import sys
+import re
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+from numpy import random
+from collections import deque
 
 class virtualMachine():
     def __init__(self, programID, quadruplesList, variablesTable, constantsTable, numTemps) -> None:
@@ -8,7 +15,7 @@ class virtualMachine():
         self.constansTable = constantsTable
         self.numTemps = numTemps
         self.currFunc = 'mainStage'
-        self.quadCont = 0
+        self.last = []
 
     def __str__(self) -> str:
         return f'Progran Name: {self.programID}\nNum of quadruples: {len(self.quadruplesList)}'
@@ -22,13 +29,29 @@ class virtualMachine():
         # Initializing Global Memory
         for var in self.variablesTable[self.programID]['vars']:
             if(self.variablesTable[self.programID]['vars'][var]['type'] == 'int'):
-                self.gMemory.global_ints.append(None)
+                if 'size' in self.variablesTable[self.programID]['vars'][var]:
+                    for i in range(0, self.variablesTable[self.programID]['vars'][var]['size']):
+                        self.gMemory.global_ints.append(0)
+                else:
+                    self.gMemory.global_ints.append(0)
             elif(self.variablesTable[self.programID]['vars'][var]['type'] == 'float'):
-                self.gMemory.global_floats.append(None)
+                if 'size' in self.variablesTable[self.programID]['vars'][var]:
+                    for i in range(0, self.variablesTable[self.programID]['vars'][var]['size']):
+                        self.gMemory.global_floats.append(0.0)
+                else:
+                    self.gMemory.global_floats.append(0.0)
             elif(self.variablesTable[self.programID]['vars'][var]['type'] == 'bool'):
-                self.gMemory.global_bools.append(None)
+                if 'size' in self.variablesTable[self.programID]['vars'][var]:
+                    for i in range(0, self.variablesTable[self.programID]['vars'][var]['size']):
+                        self.gMemory.global_bools.append(False)
+                else:
+                    self.gMemory.global_bools.append(False)
             elif(self.variablesTable[self.programID]['vars'][var]['type'] == 'string'):
-                self.gMemory.global_strings.append(None)
+                if 'size' in self.variablesTable[self.programID]['vars'][var]:
+                    for i in range(0, self.variablesTable[self.programID]['vars'][var]['size']):
+                        self.gMemory.global_strings.append('')
+                else:
+                    self.gMemory.global_strings.append('')
 
         # Initializing Constant Memory
         for el in self.constansTable:
@@ -42,21 +65,10 @@ class virtualMachine():
                 elif el == 'string':
                     self.cMemory.const_strings.append(x)
 
-        # Initializing Temp Memory
-        # Int Temp Memory (First Value)
-        for i in range(0, self.numTemps[0]):
-            self.tMemory.temp_ints.append(None)
-        # Float Temp Memory (Second Value) 
-        for i in range(0, self.numTemps[1]):
-            self.tMemory.temp_floats.append(None)
-        # Bool Temp Memory (Third Value)
-        for i in range(0, self.numTemps[2]):
-            self.tMemory.temp_bools.append(None)
-        # Strings Temp Memory (Fourth Value)
-        for i in range(0, self.numTemps[3]):
-            self.tMemory.temp_strings.append(None)
-        self.tMemory.reset()
+        self.tMemory.load(self.variablesTable, self.currFunc)
+        self.tMemory.push()
 
+    # Return variable id for error handling
     def getVarID(self, pos, isGlobal):
         if isGlobal:
             varNames = self.variablesTable[self.programID]['vars']
@@ -69,6 +81,7 @@ class virtualMachine():
                 if pos == value['memoryPos']:
                     return key
 
+    # Return variable type for error handling
     def getVarType(self, pos, isGlobal):
         if isGlobal:
             varNames = self.variablesTable[self.programID]['vars']
@@ -81,7 +94,11 @@ class virtualMachine():
                 if pos == value['memoryPos']:
                     return value['type']
 
+    # Access memory address depending on the range so we can substract base address and get the actual index
+    # of our memory lists
     def getValue(self, pos):
+        if(isinstance(pos, str)):
+            pos = self.getValue(int(pos[1:]))
         if(1000 <= pos < 2000):
             if(self.gMemory.global_ints[pos - 1000] == None):
                 print(f"Variable [ {self.getVarID(pos, True)} ] has no value !!!")
@@ -159,46 +176,263 @@ class virtualMachine():
                 print(f"Variable [ {self.getVarID(pos, False)} ] has no value !!!")
                 sys.exit()
             return self.tMemory.temp_strings_s[-1][pos - 16000]
+        # Temp Pointer
+        elif(17000 <= pos < 18000):
+            if(self.tMemory.temp_pointers_s[-1][pos - 17000] == None):
+                print(f"Variable [ {self.getVarID(pos, False)} ] has no value !!!")
+                sys.exit()
+            return self.tMemory.temp_pointers_s[-1][pos - 17000]
 
+    # Start execution of special functions
+    def doBinomial(self, trials, prob, cases):
+        x = random.binomial(n=cases,p=prob, size=trials)
+        self.last.append(x)
+        print(x)
+
+        sns.displot(random.binomial(n=cases,p=prob, size=trials), kind='hist')
+        plt.title('Binomial Distribution')
+        plt.show()
+
+    def doPoisson(self, lamb, size):
+        x = random.poisson(lam=lamb, size=size)
+        self.last.append(x)
+        print(x)
+
+        sns.displot(random.poisson(lam=lamb, size=size))
+        plt.title('Poisson Distribution')
+        plt.show()
+
+    def doCompare(self):
+        aux1 = self.last.pop()
+        aux2 = self.last.pop()
+
+        sns.displot(aux1)
+        sns.displot(aux2)
+        plt.show()
+
+    def doNormal(self, mean, stdDev, size1, size2):
+        realSize = 0
+        if(size1 == 0):
+            realSize = size2
+        elif(size2 == 0):
+            realSize = size1
+        
+        if(realSize > 0):
+            x = random.normal(loc=mean, scale=stdDev, size=realSize)
+        else:
+            x = random.normal(loc=mean, scale=stdDev, size=(size1, size2))
+        self.last.append(x)
+        print(x)
+
+        if(realSize > 0):
+            sns.displot(random.normal(size=realSize), kind='kde')
+            plt.title('Normal Distribution')
+            plt.show()
+        else:
+            sns.displot(random.normal(size=(size1, size2)), kind='kde')
+            plt.title('Normal Distribution')
+            plt.show()
+
+    def doUniform(self, low, high):
+        x = random.uniform(low=low, high=high, size=1000)
+        self.last.append(x)
+        print(x)
+        count, bins, ignored = plt.hist(x, 20, density=True)
+        plt.plot(bins, np.ones_like(bins),color='r')
+        plt.title('Uniform Distribution')
+        plt.ylabel('Density')
+        plt.xlabel('Values')
+        plt.show()
+
+    def auxLogi(self, x, mean, stdDev):
+        return np.exp((mean - x) / stdDev) / (stdDev * (1 + np.exp((mean - x) / stdDev)) ** 2)
+
+    def doLogi(self, mean, stdDev):
+        x = random.logistic(loc=mean, scale=stdDev, size=1000)
+        self.last.append(x)
+        print(x)
+        count, bins, ignored = plt.hist(x, bins=50)
+        aux = self.auxLogi(bins, mean, stdDev)
+        plt.plot(bins, aux * count.max() / aux.max())
+        plt.title('Logistic Distribution')
+        plt.ylabel('Density')
+        plt.xlabel('Values')
+        plt.show()
+
+    def doExponential(self, df, size1, size2):
+        realSize = 0
+        if(size1 == 0):
+            realSize = size2
+        elif(size2 == 0):
+            realSize = size1
+        
+        if(realSize > 0):
+            x = random.exponential(scale=df, size=realSize)
+        else:
+            x = random.exponential(scale=df, size=(size1, size2))
+        
+        self.last.append(x)
+        print(x)
+
+        if(realSize > 0):
+            sns.displot(random.exponential(size=realSize), kind='kde')
+            plt.title('Exponential Distribution')
+            plt.show()
+        else:
+            sns.displot(random.exponential(size=(size1, size2)), kind='kde')
+            plt.title('Exponential Distribution')
+            plt.show()
+
+    def doChiSquare(self, df, size1, size2):
+        realSize = 0
+        if(size1 == 0):
+            realSize = size2
+        elif(size2 == 0):
+            realSize = size1
+        
+        if(realSize > 0):
+            x = random.exponential(scale=df, size=realSize)
+        else:
+            x = random.exponential(scale=df, size=(size1, size2))
+
+        self.last.append(x)
+        print(x)
+
+        if(realSize > 0):
+            sns.displot(random.chisquare(df=df, size=realSize), kind='kde')
+            plt.title('Chi-Square Distribution')
+            plt.show()
+        else:
+            sns.displot(random.chisquare(df=df, size=(size1, size2)), kind='kde')
+            plt.title('Chi-Square Distribution')
+            plt.show()
+    # Ends especial cases of special functions
+
+    # Iterate thorough all of the elemnts inside of the list and execute one by one
     def exec(self):
-        # Loading Local Memory For Main Function
-        for i in range(0, self.variablesTable[self.currFunc]['numVars'][0]):
-            self.lMemory.local_ints.append(None)
-        for i in range(0, self.variablesTable[self.currFunc]['numVars'][1]):
-            self.lMemory.local_floats.append(None)
-        for i in range(0, self.variablesTable[self.currFunc]['numVars'][2]):
-            self.lMemory.local_bools.append(None)
-        for i in range(0, self.variablesTable[self.currFunc]['numVars'][3]):
-            self.lMemory.local_strings.append(None)
-        self.lMemory.reset()
+        quadCont = 0
+        pending_s = deque()
+        params_s = deque()
+        funcs_s = deque()
+        self.lMemory.load(self.variablesTable, self.currFunc, [0, 0, 0, 0])
+        self.lMemory.push()
 
-        while(self.quadCont < len(self.quadruplesList)):
-            oper = self.quadruplesList[self.quadCont].operator
-            operand1 = self.quadruplesList[self.quadCont].operand1
-            operand2 = self.quadruplesList[self.quadCont].operand2
-            temp = self.quadruplesList[self.quadCont].temp
+        while(quadCont < len(self.quadruplesList)):
+            oper = self.quadruplesList[quadCont].operator
+            operand1 = self.quadruplesList[quadCont].operand1
+            operand2 = self.quadruplesList[quadCont].operand2
+            temp = self.quadruplesList[quadCont].temp
 
             if(oper == 'GOTO'):
-                self.quadCont = temp
+                quadCont = temp
                 continue
             elif(oper == 'GOTOF'):
                 if(self.getValue(operand1) == False):
-                    self.quadCont = temp
+                    quadCont = temp
                     continue
+            elif(oper == 'ERA'):
+                self.currFunc = temp
+                aux = []
+                funcs_s.append(self.currFunc)
+                auxParams = [self.variablesTable[self.currFunc]['numParams'][0], self.variablesTable[self.currFunc]['numParams'][1], self.variablesTable[self.currFunc]['numParams'][2], self.variablesTable[self.currFunc]['numParams'][3]]
+                self.lMemory.load(self.variablesTable, self.currFunc, auxParams)
+                self.tMemory.load(self.variablesTable, self.currFunc)
+
+                for key, value in self.variablesTable[self.currFunc]['vars'].items():
+                    aux.append(key)
+                params_s.append(aux)
+            elif(oper == 'GOSUB'):
+                self.lMemory.push()
+                self.tMemory.push()
+                if(isinstance(temp, str)):
+                    if(temp == 'binomial'):
+                        self.doBinomial(self.lMemory.local_ints_s[-1][0], self.lMemory.local_floats_s[-1][0], self.lMemory.local_ints_s[-1][1])
+                    elif(temp == 'poisson'):
+                        self.doPoisson(self.lMemory.local_ints_s[-1][0], self.lMemory.local_ints_s[-1][1])
+                    elif(temp == 'compare'):
+                        self.doCompare()
+                    elif(temp == 'normal'):
+                        self.doNormal(self.lMemory.local_floats_s[-1][0], self.lMemory.local_floats_s[-1][1], self.lMemory.local_ints_s[-1][0], self.lMemory.local_ints_s[-1][1])
+                    elif(temp == 'uniform'):
+                        self.doUniform(self.lMemory.local_floats_s[-1][0], self.lMemory.local_floats_s[-1][1])
+                    elif(temp == 'logi'):
+                        self.doLogi(self.lMemory.local_floats_s[-1][0], self.lMemory.local_floats_s[-1][1])
+                    elif(temp == 'exponential'):
+                        self.doExponential(self.lMemory.local_floats_s[-1][0], self.lMemory.local_ints_s[-1][0],  self.lMemory.local_ints_s[-1][1])
+                    elif(temp == 'chiSquare'):
+                        self.doChiSquare(self.lMemory.local_floats_s[-1][0], self.lMemory.local_ints_s[-1][0],  self.lMemory.local_ints_s[-1][1])
+                    self.lMemory.delete()
+                    self.tMemory.delete()
+                else:
+                    jump = self.currFunc
+                    for key, value in self.variablesTable.items():
+                        if(value['start'] == temp):
+                            jump = key
+                            continue
+                    self.currFunc = jump
+                    pending_s.append(quadCont)
+                    quadCont = temp
+                    continue
+            elif(oper == 'PARAM'):
+                aux2 = re.findall(r'\d+', temp)
+                
+                if(isinstance(operand1, str)):
+                    operand1 = self.getValue(int(operand1[1:]))
+                if(len(params_s[-1]) > 0):
+                    if((1000 <= operand1 < 2000) or (5000 <= operand1 < 6000) or (9000 <= operand1 < 10000) or (13000 <= operand1 < 14000)):
+                        self.lMemory.local_ints[self.variablesTable[self.currFunc]['vars'][params_s[-1][int(aux2[0])]]['memoryPos'] - 5000] = self.getValue(operand1)
+                    if((2000 <= operand1 < 3000) or (6000 <= operand1 < 7000) or (10000 <= operand1 < 11000) or (14000 <= operand1 < 15000)):
+                        self.lMemory.local_floats[self.variablesTable[self.currFunc]['vars'][params_s[-1][int(aux2[0])]]['memoryPos'] - 6000] = self.getValue(operand1)
+                    if((3000 <= operand1 < 4000) or (7000 <= operand1 < 8000) or (11000 <= operand1 < 12000) or (15000 <= operand1 < 16000)):
+                        self.lMemory.local_bools[self.variablesTable[self.currFunc]['vars'][params_s[-1][int(aux2[0])]]['memoryPos'] - 7000] = self.getValue(operand1)
+                    if((4000 <= operand1 < 5000) or (8000 <= operand1 < 9000) or (12000 <= operand1 < 13000) or (16000 <= operand1 < 17000)):
+                        self.lMemory.local_strings[self.variablesTable[self.currFunc]['vars'][params_s[-1][int(aux2[0])]]['memoryPos'] - 8000] = self.getValue(operand1)
+            elif(oper == 'RET'):
+                aux = self.variablesTable[self.currFunc]['type']
+
+                pos = 0
+                if(aux != ''):
+                    pos = self.variablesTable[self.programID]['vars'][self.currFunc]['memoryPos']
+
+                if(temp != None):
+                    if(aux == 'int'):
+                        self.gMemory.global_ints[pos - 1000] = self.getValue(temp)
+                    elif(aux == 'float'):
+                        self.gMemory.global_floats[pos - 2000] = self.getValue(temp)
+                    elif(aux == 'bool'):
+                        self.gMemory.global_bools[pos - 2000] = self.getValue(temp)
+                    elif(aux == 'string'):
+                        self.gMemory.global_strings[pos - 2000] = self.getValue(temp)
+
+                self.lMemory.delete()
+                self.tMemory.delete()
+                quadCont = pending_s.pop() + 1
+                params_s.pop()
+                if(len(funcs_s) > 1):
+                    funcs_s.pop()
+                    self.currFunc = funcs_s.pop()
+                continue
+            elif(oper == 'ENDPROC'):
+                self.tMemory.delete()
+                self.lMemory.delete()
+                quadCont = pending_s.pop() + 1
+                params_s.pop()
+                funcs_s.pop()
+                if(len(funcs_s) > 1):
+                    funcs_s.pop()
+                    self.currFunc = funcs_s.pop()
+                continue
+            elif(oper == 'VER'):
+                if(self.getValue(operand1) < self.getValue(operand2) or self.getValue(operand1) >= self.getValue(temp)):
+                    print(f"Index [ {self.getValue(operand1)} ] out of bounds !!!")
+                    sys.exit()
             elif(oper == '+'):
-                # if(1000 <= temp < 2000):
-                #     self.gMemory.global_ints[temp - 1000] = self.getValue(operand1) + self.getValue(operand2)
-                # elif(2000 <= temp < 3000):
-                #     self.gMemory.global_floats[temp - 2000] = self.getValue(operand1) + self.getValue(operand2)
-                # elif(5000 <= temp < 6000):
-                #     self.lMemory.local_ints_s[-1][temp - 5000] = self.getValue(operand1) + self.getValue(operand2)
-                # elif(6000 <= temp < 7000):
-                #     self.lMemory.local_floats_s[-1][temp - 6000] = self.getValue(operand1) + self.getValue(operand2)
-                # el
                 if(13000 <= temp < 14000):
                     self.tMemory.temp_ints_s[-1][temp - 13000] = self.getValue(operand1) + self.getValue(operand2)
                 elif(14000 <= temp < 15000):
                     self.tMemory.temp_floats_s[-1][temp - 14000] = self.getValue(operand1) + self.getValue(operand2)
+                elif(17000 <= temp < 18000):
+                    self.tMemory.temp_pointers_s[-1][temp - 17000] = self.getValue(operand1) + self.getValue(operand2)
             elif(oper == '-'):
                 if(13000 <= temp < 14000):
                     self.tMemory.temp_ints_s[-1][temp - 13000] = self.getValue(operand1) - self.getValue(operand2)
@@ -231,10 +465,6 @@ class virtualMachine():
                 elif(14000 <= temp < 15000):
                     self.tMemory.temp_floats_s[-1][temp - 14000] = self.getValue(operand1) ** self.getValue(operand2)
             elif(oper == '<'):
-                # if(13000 <= temp < 14000):
-                #     self.tMemory.temp_ints_s[-1][temp - 13000] = self.getValue(operand1) < self.getValue(operand2)
-                # elif(14000 <= temp < 15000):
-                #     self.tMemory.temp_floats_s[-1][temp - 14000] = self.getValue(operand1) < self.getValue(operand2)
                 if(15000 <= temp < 16000):
                     self.tMemory.temp_bools_s[-1][temp - 15000] = self.getValue(operand1) < self.getValue(operand2)
             elif(oper == '<='):
@@ -281,6 +511,10 @@ class virtualMachine():
                 if(15000 <= temp < 16000):
                     self.tMemory.temp_bools_s[-1][temp - 15000] = aux1 or aux2
             elif(oper == '='):
+                resString = str(temp)
+                if(resString[0] == '*'):
+                    temp = self.getValue(int(resString[1:]))
+                
                 if(1000 <= temp < 2000):
                     self.gMemory.global_ints[temp - 1000] = self.getValue(operand1)
                 elif(2000 <= temp < 3000):
@@ -297,6 +531,10 @@ class virtualMachine():
                     self.lMemory.local_bools_s[-1][temp - 7000] = self.getValue(operand1)
                 elif(8000 <= temp < 9000):
                     self.lMemory.local_strings_s[-1][temp - 8000] = self.getValue(operand1)
+                elif(13000 <= temp < 14000):
+                    self.tMemory.temp_ints_s[-1][temp - 13000] = self.getValue(operand1)
+                elif(17000 <= temp < 18000):
+                    self.tMemory.temp_pointers_s[-1][temp - 17000] = self.getValue(operand1)
             elif(oper == 'print'):
                 print(self.getValue(temp))
             elif(oper == 'listen'):
@@ -349,4 +587,4 @@ class virtualMachine():
                     self.gMemory.global_strings[temp - 4000] = aux
                 elif(8000 <= temp < 9000):
                     self.lMemory.local_strings_s[-1][temp - 8000] = aux
-            self.quadCont += 1
+            quadCont += 1

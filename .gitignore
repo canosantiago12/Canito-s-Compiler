@@ -1,2 +1,5 @@
 *.bts
+*.txt
 parser.out
+/__pycache__
+/codigos
