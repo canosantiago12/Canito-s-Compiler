@@ -2,24 +2,22 @@ from re import M
 import ply.lex as lex
 
 # Tokens
-tokens = ('IF', 'ELSE', 'FOR', 'WHILE', 
-        'FUNC', 'RETURN', 'MAIN', 'PROGRAM',
-        'VAR', 'INT', 'FLOAT', 'BOOL', 'VOID', 'STRING', 'TRUE', 'FALSE', 'CTE_INT', 'CTE_FLOAT', 'CTE_BOOL', 'CTE_ID',
-        'PLUS', 'MINUS', 'TIMES', 'DIV', 'MOD', 'EXP', 'LESS_THAN', 'LESS_EQUAL_THAN', 'GREATER_THAN', 'GREATER_EQUAL_THAN', 'EQUAL', 'NOT_EQUAL', 'AND', 'OR',
+tokens = ('IF', 'ELSE', 'WHILE', 
+        'FUNC', 'RETURN', 'RETURN_SIGN', 'MAIN', 'BTSProgram',
+        'VAR', 'INT', 'FLOAT', 'BOOL', 'STRING', 'TRUE', 'FALSE', 'CTE_INT', 'CTE_FLOAT', 'CTE_ID', 'CTE_STRING',
+        'PLUS', 'MINUS', 'TIMES', 'DIV', 'MOD', 'EXP', 'EQUAL', 'LESS_THAN', 'LESS_EQUAL_THAN', 'GREATER_THAN', 'GREATER_EQUAL_THAN', 'EQUALS', 'NOT_EQUALS', 'AND', 'OR',
         'LEFT_PAREN', 'RIGHT_PAREN', 'LEFT_BRACKET', 'RIGHT_BRACKET', 'LEFT_CURLY_BRACKET', 'RIGHT_CURLY_BRACKET', 'COMMA', 'SEMI_COLON',
-        'MEAN', 'MEDIAN', 'MODE', 'STANDARD_DEVIATION', 'VARIANCE', 'POISSON', 'BINOMIAL', 'PLOT', 'PRINT', 'READ_INPUT'
+        'CHISQUARE', 'EXPONENTIAL', 'LOGISTIC', 'UNIFORM', 'NORMAL', 'COMPARE', 'POISSON', 'BINOMIAL', 'PRINT', 'READ_INPUT'
         )
 
 # Reserved words
 reserved = {
-    'program': 'PROGRAM',
-    'main': 'MAIN',
+    'mainStage': 'MAIN',
     'var' : 'VAR',
     'func': 'FUNC',
     'return': 'RETURN',
     'if': 'IF',
     'else': 'ELSE',
-    'for': 'FOR',
     'while': 'WHILE',
     'int': 'INT',
     'float': 'FLOAT',
@@ -27,7 +25,16 @@ reserved = {
     'string': 'STRING',
     'true': 'TRUE',
     'false': 'FALSE',
-    'void': 'VOID'
+    'listen' : 'READ_INPUT',
+    'print' : 'PRINT',
+    'poisson' : 'POISSON',
+    'binomial' : 'BINOMIAL',
+    'compare' : 'COMPARE',
+    'normal' : 'NORMAL',
+    'uniform' : 'UNIFORM',
+    'logi' : 'LOGISTIC',
+    'exponential' : 'EXPONENTIAL',
+    'chiSquare' : 'CHISQUARE'
 }
 
 # Regexp
@@ -37,9 +44,10 @@ t_TIMES = r'\*'
 t_DIV = r'\/'
 t_MOD = r'\%'
 t_EXP = r'\^'
+t_EQUAL = r'\='
 
-t_EQUAL = r'\=\='
-t_NOT_EQUAL = r'\!\='
+t_EQUALS = r'\=\='
+t_NOT_EQUALS = r'\!\='
 t_LESS_THAN = r'\<'
 t_LESS_EQUAL_THAN = r'\<\='
 t_GREATER_THAN = r'\>'
@@ -59,6 +67,11 @@ t_SEMI_COLON = r'\;'
 
 # Ignored characters
 t_ignore = " \t"
+
+t_CTE_STRING = r'"(.*?)"'
+t_RETURN_SIGN = r'\-\>'
+# t_CTE_STRING = r"""\"(.*)\"|\'(.*)\'"""
+t_BTSProgram = "BTSProgram"
 
 def t_CTE_ID(t):
     r'([a-z][a-zA-Z0-9]*)'
@@ -83,5 +96,13 @@ def t_skip_newline(t):
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
+
+def t_BLOCK_COMMENT(t):
+    r'(\*\|(.|\n)*?\|\*)'
+    pass
+
+def t_LINE_COMMENT(t):
+    r'\#.*'
+    pass
 
 lexer = lex.lex()
