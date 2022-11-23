@@ -3,7 +3,7 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 Grammar
 
 Rule 0     S' -> program_main
-Rule 1     program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+Rule 1     program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
 Rule 2     globalVariables -> vars addMemoryInfo
 Rule 3     globalVariables -> empty
 Rule 4     globalFunctions -> funcs
@@ -151,7 +151,7 @@ Terminals, with rules where they appear
 AND                  : 51
 BINOMIAL             : 88
 BOOL                 : 30
-BTSProgam            : 1
+BTSProgram           : 1
 CHISQUARE            : 95
 COMMA                : 10 12 21 44 48 100
 COMPARE              : 90
@@ -291,9 +291,9 @@ Parsing method: LALR
 state 0
 
     (0) S' -> . program_main
-    (1) program_main -> . BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> . BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
 
-    BTSProgam       shift and go to state 2
+    BTSProgram      shift and go to state 2
 
     program_main                   shift and go to state 1
 
@@ -305,14 +305,14 @@ state 1
 
 state 2
 
-    (1) program_main -> BTSProgam . CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram . CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
 
     CTE_ID          shift and go to state 3
 
 
 state 3
 
-    (1) program_main -> BTSProgam CTE_ID . startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID . startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
     (105) startup -> .
 
     SEMI_COLON      reduce using rule 105 (startup -> .)
@@ -321,14 +321,14 @@ state 3
 
 state 4
 
-    (1) program_main -> BTSProgam CTE_ID startup . SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup . SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
 
     SEMI_COLON      shift and go to state 5
 
 
 state 5
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON . globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON . globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
     (2) globalVariables -> . vars addMemoryInfo
     (3) globalVariables -> . empty
     (6) vars -> . auxVars
@@ -348,7 +348,7 @@ state 5
 
 state 6
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables . globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables . globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
     (4) globalFunctions -> . funcs
     (5) globalFunctions -> . empty
     (14) funcs -> . funcs_aux globalFunctions
@@ -429,7 +429,7 @@ state 10
 
 state 11
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions . MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions . MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
 
     MAIN            shift and go to state 22
 
@@ -543,7 +543,7 @@ state 21
 
 state 22
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN . saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN . saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
     (108) saveFuncID -> .
 
     LEFT_PAREN      reduce using rule 108 (saveFuncID -> .)
@@ -663,7 +663,7 @@ state 32
 
 state 33
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID . addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID . addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
     (110) addMemoryInfo -> .
 
     LEFT_PAREN      reduce using rule 110 (addMemoryInfo -> .)
@@ -707,7 +707,7 @@ state 37
 
 state 38
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo . LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo . LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
 
     LEFT_PAREN      shift and go to state 44
 
@@ -778,7 +778,7 @@ state 43
 
 state 44
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN . RIGHT_PAREN setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN . RIGHT_PAREN setMain funcBody endFunction endProgram
 
     RIGHT_PAREN     shift and go to state 52
 
@@ -921,7 +921,7 @@ state 51
 
 state 52
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN . setMain funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN . setMain funcBody endFunction endProgram
     (106) setMain -> .
 
     LEFT_CURLY_BRACKET reduce using rule 106 (setMain -> .)
@@ -977,7 +977,7 @@ state 58
 
 state 59
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain . funcBody endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain . funcBody endFunction endProgram
     (23) funcBody -> . LEFT_CURLY_BRACKET auxFuncBody RIGHT_CURLY_BRACKET
 
     LEFT_CURLY_BRACKET shift and go to state 65
@@ -1025,7 +1025,7 @@ state 63
 
 state 64
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody . endFunction endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody . endFunction endProgram
     (111) endFunction -> .
 
     $end            reduce using rule 111 (endFunction -> .)
@@ -1206,7 +1206,7 @@ state 70
 
 state 71
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction . endProgram
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction . endProgram
     (107) endProgram -> .
 
     $end            reduce using rule 107 (endProgram -> .)
@@ -1795,9 +1795,9 @@ state 106
 
 state 107
 
-    (1) program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram .
+    (1) program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram .
 
-    $end            reduce using rule 1 (program_main -> BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram .)
+    $end            reduce using rule 1 (program_main -> BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram .)
 
 
 state 108

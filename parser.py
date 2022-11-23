@@ -54,7 +54,7 @@ contParams = 0
 # Main function variables and functions Rules
 def p_mainFunction(p):
     '''
-    program_main : BTSProgam CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
+    program_main : BTSProgram CTE_ID startup SEMI_COLON globalVariables globalFunctions MAIN saveFuncID addMemoryInfo LEFT_PAREN RIGHT_PAREN setMain funcBody endFunction endProgram
     '''
 
 def p_globalVariables(p):
